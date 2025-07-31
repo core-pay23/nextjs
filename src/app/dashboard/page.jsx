@@ -7,6 +7,7 @@ import StatCard from "@/components/dashboard/StatCard";
 import DebitCard from "@/components/dashboard/DebitCard";
 import ChartCard from "@/components/dashboard/ChartCard";
 import ArtistsTable from "@/components/dashboard/ArtistsTable";
+import CreatePaymentModal from "./_components/createPaymentModal";
 import {
   MusicIcon,
   HardDriveIcon,
@@ -24,7 +25,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
-
+  const [isCreatePaymentModalOpen, setIsCreatePaymentModalOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -47,8 +48,19 @@ export default function DashboardPage() {
     return null;
   }
 
+  const handleCreatePayment = async (paymentData) => {
+    // Handle payment creation logic here
+    console.log('Creating payment:', paymentData);
+    // Example: await createPaymentAPI(paymentData);
+  };
+
   return (
     <section className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+      <CreatePaymentModal
+        isOpen={isCreatePaymentModalOpen}
+        onClose={() => setIsCreatePaymentModalOpen(false)}
+        onCreate={handleCreatePayment}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -66,15 +78,15 @@ export default function DashboardPage() {
         />
         {/* Shortcut Buttons */}
         <div className="col-span-2 grid grid-cols-2 gap-4">
-          <a
-            href="/payment"
+          <button
+            onClick={() => setIsCreatePaymentModalOpen(true)}
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-blue-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <span className="mb-2 text-blue-400 group-hover:text-blue-500">
               <MoneyBillIcon className="h-6 w-6" />
             </span>
             <span className="text-white font-medium">Create Payment</span>
-          </a>
+          </button>
           <a
             href="/wallet"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-emerald-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-emerald-500"
