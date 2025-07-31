@@ -1,12 +1,17 @@
 'use client';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSignature }) => {
-  
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Auto-trigger signing when wallet connects (only once)
   useEffect(() => {
-    if (isConnected && !isSigning) {
+    if (mounted && isConnected && !isSigning) {
       // Small delay to ensure wallet is fully connected
       const timer = setTimeout(() => {
         handleSignMessage();
@@ -14,7 +19,25 @@ const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSig
       
       return () => clearTimeout(timer);
     }
-  }, [isConnected, handleSignMessage, isSigning]);
+  }, [isConnected, handleSignMessage, isSigning, mounted]);
+
+  // Prevent hydration mismatch by not rendering until client-side mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0c1425] flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl mb-4 animate-pulse"></div>
+            <div className="h-8 bg-slate-700/50 rounded w-32 mx-auto mb-2 animate-pulse"></div>
+            <div className="h-4 bg-slate-700/30 rounded w-48 mx-auto animate-pulse"></div>
+          </div>
+          <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+            <div className="h-20 bg-slate-700/30 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0c1425] flex items-center justify-center p-4">

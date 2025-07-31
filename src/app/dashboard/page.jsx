@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import StatCard from "@/components/dashboard/StatCard";
@@ -16,12 +16,22 @@ import { ChevronDown } from "react-feather";
 export default function DashboardPage() {
   const { isConnected } = useAccount();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isConnected) {
       router.push('/');
     }
   }, [isConnected, router]);
+
+  // Don't render until client-side mounted to prevent hydration issues
+  if (!mounted) {
+    return null;
+  }
 
   // Don't render dashboard content if not connected
   if (!isConnected) {

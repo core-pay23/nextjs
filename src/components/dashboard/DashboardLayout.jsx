@@ -12,6 +12,8 @@ const checkSignature = async () => {
     const savedSignature = localStorage.getItem('walletSignature');
     const savedAddress = localStorage.getItem('walletAddress');
     const savedTimestamp = localStorage.getItem('signatureTimestamp');
+
+    console.log("Checking signature:", savedSignature, savedAddress, savedTimestamp);
     
     if (!savedSignature || !savedAddress || !savedTimestamp) {
       return false;
@@ -55,13 +57,19 @@ export default function DashboardLayout({ children }) {
   const { signMessage } = useSignMessage();
   const [isSigning, setIsSigning] = useState(false);
   const [hasValidSignature, setHasValidSignature] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Check for existing valid signature when wallet connects
     const checkExistingSignature = async () => {
       if (isConnected && address) {
         const isValid = await checkSignature();
+        console.log("Signature valid:", isValid);
         setHasValidSignature(isValid);
         
         // If signature exists but is for different address, clear it
@@ -108,6 +116,17 @@ export default function DashboardLayout({ children }) {
       setIsSigning(false);
     }
   };
+
+  // Don't render anything until client-side hydration is complete
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0c1425] flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 bg-blue-600/20 rounded-xl"></div>
+        </div>
+      </div>
+    );
+  }
 
   // If wallet is not connected, show the connection page
   if (!isConnected) {
