@@ -1,4 +1,5 @@
-import { Video, HelpCircle } from "react-feather";
+'use client';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Header() {
   return (
@@ -13,17 +14,7 @@ export default function Header() {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <button className="relative hidden sm:block">
-          <Video className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-cyan-500"></span>
-        </button>
-        <HelpCircle className="h-5 w-5 hidden sm:block" />
-        <div
-          className="h-8 w-8 rounded-full bg-cover bg-center"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=facearea&facepad=2.5&w=256&h=256&q=80')"
-          }}
-        />
+        <ConnectButton />
       </div>
     </header>
   );

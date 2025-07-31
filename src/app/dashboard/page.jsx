@@ -1,8 +1,14 @@
-import StatCard from '@/components/dashboard/StatCard';
-import ChartCard from '@/components/dashboard/ChartCard';
-import ArtistsTable from '@/components/dashboard/ArtistsTable';
-import { MusicIcon, HardDriveIcon, ActivityIcon, DollarSignIcon } from '@/components/dashboard/Icons';
-import { ChevronDown } from 'react-feather';
+'use client';
+import StatCard from "@/components/dashboard/StatCard";
+import ChartCard from "@/components/dashboard/ChartCard";
+import ArtistsTable from "@/components/dashboard/ArtistsTable";
+import {
+  MusicIcon,
+  HardDriveIcon,
+  ActivityIcon,
+  DollarSignIcon,
+} from "@/components/dashboard/Icons";
+import { ChevronDown } from "react-feather";
 
 export default function DashboardPage() {
   return (

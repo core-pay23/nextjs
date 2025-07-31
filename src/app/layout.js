@@ -7,16 +7,14 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "SoundForge Pro Dashboard",
-  description: "Music production analytics dashboard",
+  title: "Lisk Payment Gateway",
+  description: "Web3 payment gateway with music production analytics dashboard",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body
-        className={`${inter.variable} font-inter h-full antialiased`}
-      >
+      <body className={`${inter.variable} font-inter h-full antialiased`}>
         {children}
       </body>
     </html>
