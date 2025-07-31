@@ -28,6 +28,8 @@ export default function DashboardPage() {
   const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
   const [isCreatePaymentModalOpen, setIsCreatePaymentModalOpen] =
     useState(false);
+  const [paymentModalState, setPaymentModalState] = useState("create"); // create, success
+  const [paymentData, setPaymentData] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -78,10 +80,8 @@ export default function DashboardPage() {
       }
 
       const result = await response.json();
-      console.log("Payment created successfully:", result);
-
-      // Close modal on success
-      setIsCreatePaymentModalOpen(false);
+      setPaymentData(result);
+      setPaymentModalState("success");
 
       return result;
     } catch (error) {
@@ -96,6 +96,10 @@ export default function DashboardPage() {
         isOpen={isCreatePaymentModalOpen}
         onClose={() => setIsCreatePaymentModalOpen(false)}
         onCreate={handleCreatePayment}
+        paymentModalState={paymentModalState}
+        setPaymentModalState={setPaymentModalState}
+        paymentData={paymentData}
+        setPaymentData={setPaymentData}
       />
 
       {/* Stats Cards */}
