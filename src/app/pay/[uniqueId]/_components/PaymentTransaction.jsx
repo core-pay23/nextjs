@@ -6,6 +6,7 @@ import { useWalletBalance } from "@/hooks/useWallet";
 import TokenDisplay from "./TokenDisplay";
 import { tokenList } from "@/lib/tokenlist";
 import { parseUnits, formatUnits } from "viem";
+import Image from "next/image";
 
 const PaymentTransaction = ({ paymentData, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -274,10 +275,15 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {/* Security Notice */}
       <div className="text-center text-white/60 text-sm">
         <div className="flex items-center justify-center space-x-1">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-          </svg>
-          <span>Secured by blockchain technology</span>
+            <Image
+              src="/icon.svg"
+              alt="Koneksi Logo"
+              width={120}
+              height={120}
+              className="h-6 w-6"
+              priority
+            />
+          <span>Transaction Secured by Koneksi</span>
         </div>
       </div>
     </div>

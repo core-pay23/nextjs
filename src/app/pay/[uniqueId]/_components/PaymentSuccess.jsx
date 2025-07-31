@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import TokenDisplay from "./TokenDisplay";
+import Image from "next/image";
 
 const PaymentSuccess = ({ paymentData, transactionHash }) => {
   const [copied, setCopied] = useState(false);
@@ -21,7 +22,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
     <div className="space-y-6">
       {/* Success Animation */}
       <div className="text-center">
-        <div className="w-20 h-20 mx-auto bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4">
+        <div className="w-14 h-14 mx-auto bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4">
           <svg 
             className="w-10 h-10 text-white animate-pulse" 
             fill="currentColor" 
@@ -154,10 +155,15 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
       {/* Footer */}
       <div className="text-center text-white/60 text-sm">
         <div className="flex items-center justify-center space-x-1">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <span>Secured by Koneksi</span>
+            <Image
+              src="/icon.svg"
+              alt="Koneksi Logo"
+              width={120}
+              height={120}
+              className="h-6 w-6"
+              priority
+            />
+          <span>Transaction Secured by Koneksi</span>
         </div>
       </div>
     </div>
