@@ -22,7 +22,7 @@ export const tokenList = [
     {
         name: "Mock USDC",
         symbol: "MOCK USDC",
-        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        address: "0x506C07C8737Da3AE898a60352863079f6B3A1DBa",
         decimals: 6,
         logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
         abi: erc20Abi,

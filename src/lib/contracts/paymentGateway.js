@@ -1,5 +1,5 @@
 export const PaymentGatewayAddress =
-  "0x8cfca2ef268524dd23544128c77d610daffaf913";
+  "0x50C586506117f7963e461d99D49F9E38E5c0700b";
 
 export const PaymentGatewayAbi = [
   {

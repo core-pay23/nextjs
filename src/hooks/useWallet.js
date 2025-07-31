@@ -47,6 +47,8 @@ export const useWalletBalance = (token = null) => {
     enabled: isConnected && !!address,
   });
 
+  console.log("Balance Query:", balanceQuery);
+
   return {
     balance: balanceQuery.data,
     isLoading: balanceQuery.isLoading,
