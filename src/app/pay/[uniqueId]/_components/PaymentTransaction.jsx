@@ -11,9 +11,11 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   
-  const { address, isConnected } = useWallet();
+  const { address, isConnected, openConnectModal, switchChain, chainId } = useWallet();
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
+  const requiredChainId = 4202; // Lisk Sepolia
+  const isCorrectNetwork = chainId === requiredChainId;
 
   // Get token info
   const token = tokenList.find(
@@ -24,6 +26,18 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   const { balance, isLoading: balanceLoading } = useWalletBalance(
     token?.native ? null : tokenAddress
   );
+
+  const handleConnectWallet = () => {
+    openConnectModal?.();
+  };
+
+  const handleSwitchNetwork = async () => {
+    try {
+      await switchChain({ chainId: requiredChainId });
+    } catch (err) {
+      setError("Failed to switch network. Please switch manually.");
+    }
+  };
 
   const hasInsufficientBalance = () => {
     if (!balance || !token) return false;
@@ -37,8 +51,18 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   };
 
   const handlePayment = async () => {
-    if (!isConnected || !token) {
-      setError("Wallet not connected or invalid token");
+    if (!isConnected) {
+      setError("Wallet not connected");
+      return;
+    }
+
+    if (!isCorrectNetwork) {
+      setError("Please switch to Lisk Sepolia network");
+      return;
+    }
+
+    if (!token) {
+      setError("Invalid token");
       return;
     }
 
@@ -80,6 +104,51 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           Review and confirm your transaction
         </p>
       </div>
+
+      {/* Connection and Network Status */}
+      {!isConnected && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+          <div className="flex items-start space-x-3">
+            <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <div className="text-red-400 font-medium text-sm">Wallet Not Connected</div>
+              <div className="text-red-200/80 text-sm mt-1">
+                Please connect your wallet to proceed with the payment.
+              </div>
+              <button
+                onClick={handleConnectWallet}
+                className="mt-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 px-3 py-1 rounded-lg text-sm transition-colors"
+              >
+                Connect Wallet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isConnected && !isCorrectNetwork && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+          <div className="flex items-start space-x-3">
+            <svg className="w-5 h-5 text-amber-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <div className="text-amber-400 font-medium text-sm">Wrong Network</div>
+              <div className="text-amber-200/80 text-sm mt-1">
+                Please switch to Lisk Sepolia network to continue.
+              </div>
+              <button
+                onClick={handleSwitchNetwork}
+                className="mt-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-lg text-sm transition-colors"
+              >
+                Switch to Lisk Sepolia
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Transaction Summary */}
       <div className="bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4">
@@ -166,7 +235,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {/* Payment Button */}
       <button
         onClick={handlePayment}
-        disabled={isProcessing || hasInsufficientBalance() || balanceLoading}
+        disabled={isProcessing || hasInsufficientBalance() || balanceLoading || !isConnected || !isCorrectNetwork}
         className="
           w-full bg-gradient-to-r from-blue-500 to-cyan-600 
           hover:from-blue-600 hover:to-cyan-700 
@@ -186,6 +255,10 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             </svg>
             <span>Processing...</span>
           </>
+        ) : !isConnected ? (
+          <span>Connect Wallet to Continue</span>
+        ) : !isCorrectNetwork ? (
+          <span>Switch Network to Continue</span>
         ) : hasInsufficientBalance() ? (
           <span>Insufficient Balance</span>
         ) : (

@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import PaymentReview from "./PaymentReview";
-import PaymentConnect from "./PaymentConnect";
 import PaymentTransaction from "./PaymentTransaction";
 import PaymentSuccess from "./PaymentSuccess";
 import PaymentProgress from "./PaymentProgress";
 
 const PAYMENT_STEPS = {
   REVIEW: "review",
-  CONNECT: "connect", 
   TRANSACTION: "transaction",
   SUCCESS: "success",
 };
@@ -21,9 +19,6 @@ const PaymentContainer = ({ paymentData }) => {
   const handleNextStep = () => {
     switch (currentStep) {
       case PAYMENT_STEPS.REVIEW:
-        setCurrentStep(PAYMENT_STEPS.CONNECT);
-        break;
-      case PAYMENT_STEPS.CONNECT:
         setCurrentStep(PAYMENT_STEPS.TRANSACTION);
         break;
       case PAYMENT_STEPS.TRANSACTION:
@@ -42,13 +37,6 @@ const PaymentContainer = ({ paymentData }) => {
       case PAYMENT_STEPS.REVIEW:
         return (
           <PaymentReview
-            paymentData={paymentData}
-            onNext={handleNextStep}
-          />
-        );
-      case PAYMENT_STEPS.CONNECT:
-        return (
-          <PaymentConnect
             paymentData={paymentData}
             onNext={handleNextStep}
           />
