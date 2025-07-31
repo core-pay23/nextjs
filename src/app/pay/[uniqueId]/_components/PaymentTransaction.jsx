@@ -7,12 +7,13 @@ import TokenDisplay from "./TokenDisplay";
 import { tokenList } from "@/lib/tokenlist";
 import { parseUnits, formatUnits } from "viem";
 import Image from "next/image";
+import CustomConnectButton from "./CustomConnectButton";
 
 const PaymentTransaction = ({ paymentData, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   
-  const { address, isConnected, openConnectModal, switchChain, chainId } = useWallet();
+  const { address, isConnected, openConnectModal, switchChain, chainId, disconnect } = useWallet();
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
   const requiredChainId = 4202; // Lisk Sepolia
@@ -28,6 +29,17 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     token?.native ? null : tokenAddress
   );
 
+  console.log('Wallet and balance data:', { 
+    address, 
+    isConnected, 
+    chainId, 
+    balance, 
+    balanceLoading, 
+    token, 
+    amount,
+    tokenAddress 
+  });
+
   const handleConnectWallet = () => {
     openConnectModal?.();
   };
@@ -41,9 +53,41 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   };
 
   const hasInsufficientBalance = () => {
-    if (!balance || !token) return false;
-    const requiredAmount = parseUnits(amount.toString(), token.decimals);
-    return balance.value < requiredAmount;
+    console.log('=== hasInsufficientBalance Debug ===');
+    console.log('Function called');
+    console.log('Raw values:', { balance, token, amount });
+    console.log('Balance exists:', !!balance);
+    console.log('Token exists:', !!token);
+    
+    if (!token) {
+      console.log('❌ No token data - returning true (block transaction)');
+      return true; // Block transaction if no token
+    }
+    
+    if (!balance || balance === undefined) {
+      console.log('❌ No balance data - returning true (block transaction)');
+      return true; // Block transaction if balance not loaded
+    }
+    
+    console.log('✅ Both balance and token exist, proceeding with calculation...');
+    console.log('Token decimals:', token.decimals);
+    console.log('Amount (raw):', amount, 'Type:', typeof amount);
+    
+    try {
+      const requiredAmount = parseUnits(amount.toString(), token.decimals);
+      console.log('Required amount (wei):', requiredAmount.toString());
+      console.log('Wallet balance (wei):', balance.value?.toString());
+      console.log('Balance value type:', typeof balance.value);
+      
+      const insufficient = balance.value < requiredAmount;
+      console.log('Is insufficient?', insufficient);
+      console.log('================================');
+      
+      return insufficient;
+    } catch (error) {
+      console.error('Error in balance calculation:', error);
+      return true; // Block transaction on error
+    }
   };
 
   const formatBalance = () => {
@@ -166,15 +210,45 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         </div>
 
         {/* Recipient */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <div className="text-sm text-white/60">To</div>
           <div className="bg-slate-700/40 p-3 rounded-lg border border-white/5">
             <div className="text-white text-sm font-mono">
               {recipientAddress}
             </div>
           </div>
-        </div>
+        </div> */}
+
       </div>
+
+      {/* Connected Wallet Info */}
+      {isConnected && (
+        <div className="bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <div className="flex flex-col space-y-1">
+                <div className="text-white/60 text-xs">Connected Wallet</div>
+                <div className="text-white text-sm font-mono">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
+                </div>
+                <div className="text-white/60 text-xs">
+                  {chainId === 4202 ? 'Lisk Sepolia Testnet' : `Chain ID: ${chainId}`}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setError(null);
+                disconnect();
+              }}
+              className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 px-3 py-2 rounded-lg text-sm transition-colors"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Wallet Balance */}
       <div className="bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-xl p-4">
@@ -189,13 +263,17 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
                 </svg>
                 <span className="text-sm">Loading...</span>
               </div>
+            ) : !balance || !token ? (
+              <span className="text-red-400 text-sm">
+                {balance == undefined ? "0" : "No balance data"}
+              </span>
             ) : (
               formatBalance()
             )}
           </div>
         </div>
         
-        {hasInsufficientBalance() && (
+        {!balanceLoading && hasInsufficientBalance() && (
           <div className="mt-2 text-red-400 text-sm">
             Insufficient balance for this transaction
           </div>
@@ -236,7 +314,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {/* Payment Button */}
       <button
         onClick={handlePayment}
-        disabled={isProcessing || hasInsufficientBalance() || balanceLoading || !isConnected || !isCorrectNetwork}
+        disabled={isProcessing || balanceLoading || !isConnected || !isCorrectNetwork || hasInsufficientBalance()}
         className="
           w-full bg-gradient-to-r from-blue-500 to-cyan-600 
           hover:from-blue-600 hover:to-cyan-700 
@@ -260,6 +338,10 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           <span>Connect Wallet to Continue</span>
         ) : !isCorrectNetwork ? (
           <span>Switch Network to Continue</span>
+        ) : balanceLoading ? (
+          <span>Loading Balance...</span>
+        ) : !balance || !token ? (
+          <span>Unable to Load Balance</span>
         ) : hasInsufficientBalance() ? (
           <span>Insufficient Balance</span>
         ) : (
