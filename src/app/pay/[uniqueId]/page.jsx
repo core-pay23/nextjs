@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import React from "react";
+import PaymentContainer from "./_components/PaymentContainer";
 
 const PayPage = async ({ params }) => {
   const { uniqueId } = params;
@@ -19,13 +20,7 @@ const PayPage = async ({ params }) => {
     notFound();
   }
 
-  // Render your payment page here, pass paymentData as needed
-  return (
-    <div>
-      {/* Render paymentData details here */}
-      <pre>{JSON.stringify(paymentData, null, 2)}</pre>
-    </div>
-  );
+  return <PaymentContainer paymentData={paymentData} />;
 };
 
 export default PayPage;
