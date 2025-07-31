@@ -52,7 +52,7 @@ The **Koneksi** is a secure and seamless payment processing system designed for 
 - **Consistent Pattern**: Applied to all cards, sidebar, and overlays
 
 ### Icon System
-- **Library**: Lucide Icons
+- **Library**: react-feather
 - **Style**: Outline icons, consistent sizing (h-4 w-4 to h-5 w-5)
 - **Colors**: Contextual coloring based on function
 
