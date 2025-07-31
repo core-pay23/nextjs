@@ -1,17 +1,21 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { generateSalt, generateWallet, encryptPrivateKey } from '@/lib/cryptoUtils';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import {
+  generateSalt,
+  generateWallet,
+  encryptPrivateKey,
+} from "@/lib/cryptoUtils";
 
 const prisma = new PrismaClient();
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const clientWalletAddress = searchParams.get('clientWalletAddress');
+    const clientWalletAddress = searchParams.get("clientWalletAddress");
 
     if (!clientWalletAddress) {
       return NextResponse.json(
-        { error: 'clientWalletAddress is required' },
+        { error: "clientWalletAddress is required" },
         { status: 400 }
       );
     }
@@ -19,25 +23,30 @@ export async function GET(request) {
     // Validate wallet address format (basic validation)
     if (!/^0x[a-fA-F0-9]{40}$/.test(clientWalletAddress)) {
       return NextResponse.json(
-        { error: 'Invalid client wallet address format' },
+        { error: "Invalid client wallet address format" },
         { status: 400 }
       );
     }
 
     // Check if user exists
     let user = await prisma.user.findUnique({
-      where: { clientWalletAddress }
+      where: { clientWalletAddress },
     });
 
     if (!user) {
       // Generate new wallet
       const wallet = generateWallet();
       const salt = generateSalt();
-      
+
       // For now, we'll store the private key as-is (in production, encrypt it)
       // You should use a secure password for encryption in production
-      const encryptionPassword = process.env.ENCRYPTION_PASSWORD || 'default-password-change-this';
-      const encryptedPrivateKey = encryptPrivateKey(wallet.privateKey, encryptionPassword, salt);
+      const encryptionPassword =
+        process.env.ENCRYPTION_PASSWORD || "default-password-change-this";
+      const encryptedPrivateKey = encryptPrivateKey(
+        wallet.privateKey,
+        encryptionPassword,
+        salt
+      );
 
       // Create new user with wallet
       user = await prisma.user.create({
@@ -45,8 +54,8 @@ export async function GET(request) {
           clientWalletAddress,
           EoaAddress: wallet.address,
           EoaPrivateKey: encryptedPrivateKey,
-          salt: salt
-        }
+          salt: salt,
+        },
       });
     }
 
@@ -55,22 +64,21 @@ export async function GET(request) {
       data: {
         clientWalletAddress: user.clientWalletAddress,
         eoaAddress: user.EoaAddress,
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     });
-
   } catch (error) {
-    console.error('Error in get-eoa-address API:', error);
-    
-    if (error.code === 'P2002') {
+    console.error("Error in get-eoa-address API:", error);
+
+    if (error.code === "P2002") {
       return NextResponse.json(
-        { error: 'Wallet address already exists' },
+        { error: "Wallet address already exists" },
         { status: 409 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   } finally {
@@ -85,7 +93,7 @@ export async function POST(request) {
 
     if (!clientWalletAddress) {
       return NextResponse.json(
-        { error: 'clientWalletAddress is required' },
+        { error: "clientWalletAddress is required" },
         { status: 400 }
       );
     }
@@ -93,23 +101,28 @@ export async function POST(request) {
     // Validate wallet address format
     if (!/^0x[a-fA-F0-9]{40}$/.test(clientWalletAddress)) {
       return NextResponse.json(
-        { error: 'Invalid client wallet address format' },
+        { error: "Invalid client wallet address format" },
         { status: 400 }
       );
     }
 
     // Check if user exists
     let user = await prisma.user.findUnique({
-      where: { clientWalletAddress }
+      where: { clientWalletAddress },
     });
 
     if (!user) {
       // Generate new wallet
       const wallet = generateWallet();
       const salt = generateSalt();
-      
-      const encryptionPassword = process.env.ENCRYPTION_PASSWORD || 'default-password-change-this';
-      const encryptedPrivateKey = encryptPrivateKey(wallet.privateKey, encryptionPassword, salt);
+
+      const encryptionPassword =
+        process.env.ENCRYPTION_PASSWORD || "default-password-change-this";
+      const encryptedPrivateKey = encryptPrivateKey(
+        wallet.privateKey,
+        encryptionPassword,
+        salt
+      );
 
       // Create new user with wallet
       user = await prisma.user.create({
@@ -117,8 +130,8 @@ export async function POST(request) {
           clientWalletAddress,
           EoaAddress: wallet.address,
           EoaPrivateKey: encryptedPrivateKey,
-          salt: salt
-        }
+          salt: salt,
+        },
       });
     }
 
@@ -127,22 +140,21 @@ export async function POST(request) {
       data: {
         clientWalletAddress: user.clientWalletAddress,
         eoaAddress: user.EoaAddress,
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     });
-
   } catch (error) {
-    console.error('Error in get-eoa-address API:', error);
-    
-    if (error.code === 'P2002') {
+    console.error("Error in get-eoa-address API:", error);
+
+    if (error.code === "P2002") {
       return NextResponse.json(
-        { error: 'Wallet address already exists' },
+        { error: "Wallet address already exists" },
         { status: 409 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   } finally {

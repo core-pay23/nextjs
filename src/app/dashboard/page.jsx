@@ -1,7 +1,8 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAccount } from 'wagmi';
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
+import { useEOAAddress } from "@/hooks";
 import StatCard from "@/components/dashboard/StatCard";
 import ChartCard from "@/components/dashboard/ChartCard";
 import ArtistsTable from "@/components/dashboard/ArtistsTable";
@@ -17,14 +18,17 @@ export default function DashboardPage() {
   const { isConnected } = useAccount();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
+
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+
   useEffect(() => {
     if (!isConnected) {
-      router.push('/');
+      router.push("/");
     }
   }, [isConnected, router]);
 
@@ -40,6 +44,32 @@ export default function DashboardPage() {
 
   return (
     <section className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+      {/* EOA Address Display */}
+      <div className="bg-slate-800/50 border border-white/10 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-white/60 mb-2">
+          Your EOA Address
+        </h3>
+        {loading ? (
+          <div className="text-sm text-white/40">Loading EOA address...</div>
+        ) : error ? (
+          <div className="text-sm text-red-400">Error: {error}</div>
+        ) : eoaAddress ? (
+          <div className="text-sm font-mono text-emerald-400 break-all">
+            {eoaAddress}
+          </div>
+        ) : (
+          <div className="text-sm text-white/40">No EOA address found</div>
+        )}
+        {clientWalletAddress && (
+          <div className="mt-2">
+            <span className="text-xs text-white/40">Client Wallet: </span>
+            <span className="text-xs font-mono text-white/60 break-all">
+              {clientWalletAddress}
+            </span>
+          </div>
+        )}
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

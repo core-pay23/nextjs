@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Test get-eoa-address API",
+			"command": "curl -X GET \"http://localhost:3000/api/get-eoa-address?clientWalletAddress=0xB3bC5e0c37f99436b1BAC787faE96a8D0609A170\"",
+			"group": "test"
+		}
+	]
+}

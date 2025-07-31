@@ -18,3 +18,6 @@ export {
   useNetwork,
   useConnectionStatus,
 } from './useWallet';
+
+// EOA Address hook
+export { useEOAAddress } from './useEOAAddress';
