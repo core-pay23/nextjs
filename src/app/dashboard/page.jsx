@@ -1,4 +1,7 @@
 'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import StatCard from "@/components/dashboard/StatCard";
 import ChartCard from "@/components/dashboard/ChartCard";
 import ArtistsTable from "@/components/dashboard/ArtistsTable";
@@ -11,6 +14,20 @@ import {
 import { ChevronDown } from "react-feather";
 
 export default function DashboardPage() {
+  const { isConnected } = useAccount();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isConnected) {
+      router.push('/');
+    }
+  }, [isConnected, router]);
+
+  // Don't render dashboard content if not connected
+  if (!isConnected) {
+    return null;
+  }
+
   return (
     <section className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
       {/* Stats Cards */}

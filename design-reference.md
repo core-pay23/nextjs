@@ -1,7 +1,7 @@
-# SoundForge Pro Dashboard - Design Reference
+# Koneksi Dashboard - Design Reference
 
 ## Overview
-The SoundForge Pro Dashboard is a comprehensive music production analytics interface built as a dark-themed, modern web application. It features a professional music studio aesthetic with a sophisticated dark color palette and extensive use of glassmorphism effects.
+The **Koneksi** is a secure and seamless payment processing system designed for digital assets. It features a sophisticated dark-themed interface with modern design elements and extensive use of glassmorphism effects, offering a sleek and intuitive user experience.
 
 ## Color Palette
 
@@ -35,7 +35,7 @@ The SoundForge Pro Dashboard is a comprehensive music production analytics inter
 - **Background**: `slate-900/50` with backdrop blur
 - **Border**: Right border with `white/10`
 - **Content Sections**:
-  1. **Brand Header**: SoundForge logo with waveform icon in gradient container
+  1. **Brand Header**: Brand Header: Koneksi logo with a subtle, interconnected network icon (representing digital connections/blockchain) within a translucent, glassmorphism-style container. Koneksi wordmark in a sleek, modern font, accented by a glowing, subtle gradient underline or side-line, all set against a dark, blurred background.
   2. **Action Button**: "New Track" with keyboard shortcut (⌘N)
   3. **Navigation Menu**: 6 main sections with icons
   4. **Upgrade Prompt**: Premium upsell with gradient background
