@@ -12,6 +12,10 @@ import {
   HardDriveIcon,
   ActivityIcon,
   DollarSignIcon,
+  WalletIcon,
+  HistoryIcon,
+  BillIcon,
+  MoneyBillIcon,
 } from "@/components/dashboard/Icons";
 import { ChevronDown } from "react-feather";
 
@@ -60,20 +64,45 @@ export default function DashboardPage() {
           iconBgColor="bg-cyan-600/20"
           iconColor="text-cyan-400"
         />
-        <StatCard
-          title="Active Sessions"
-          value="12"
-          icon={ActivityIcon}
-          iconBgColor="bg-green-600/20"
-          iconColor="text-green-400"
-        />
-        <StatCard
-          title="Revenue"
-          value="$12.4K"
-          icon={DollarSignIcon}
-          iconBgColor="bg-purple-600/20"
-          iconColor="text-purple-400"
-        />
+        {/* Shortcut Buttons */}
+        <div className="col-span-2 grid grid-cols-2 gap-4">
+          <a
+            href="/payment"
+            className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-blue-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <span className="mb-2 text-blue-400 group-hover:text-blue-500">
+              <MoneyBillIcon className="h-6 w-6" />
+            </span>
+            <span className="text-white font-medium">Create Payment</span>
+          </a>
+          <a
+            href="/wallet"
+            className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-emerald-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <span className="mb-2 text-emerald-400 group-hover:text-emerald-500">
+              <ActivityIcon className="h-6 w-6" />
+            </span>
+            <span className="text-white font-medium">Withdraw</span>
+          </a>
+          <a
+            href="/wallet?action=history"
+            className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-purple-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <span className="mb-2 text-purple-400 group-hover:text-purple-500">
+              <HistoryIcon className="h-6 w-6" />
+            </span>
+            <span className="text-white font-medium">History</span>
+          </a>
+          <a
+            href="/wallet"
+            className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-cyan-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          >
+            <span className="mb-2 text-cyan-400 group-hover:text-cyan-500">
+              <WalletIcon className="h-6 w-6" />
+            </span>
+            <span className="text-white font-medium">Wallet</span>
+          </a>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
