@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Image from "next/image";
 
 const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSignature }) => {
   const [mounted, setMounted] = useState(false);
@@ -44,20 +45,16 @@ const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSig
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl mb-4">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h18m-7.5-14L21 7.5m0 0L16.5 12M21 7.5H3"
-              />
-            </svg>
+          <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
+            {/* Replaced with icon.svg, now larger */}
+            <Image
+              src="/icon.svg"
+              alt="Koneksi Logo"
+              width={120}
+              height={120}
+              className="h-20 w-20"
+              priority
+            />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Koneksi</h1>
           <p className="text-white/60">
