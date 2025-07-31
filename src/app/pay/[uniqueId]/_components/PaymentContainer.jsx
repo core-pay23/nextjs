@@ -67,7 +67,7 @@ const PaymentContainer = ({ paymentData }) => {
         <PaymentProgress currentStep={currentStep} />
         
         {/* Payment Card */}
-        <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
           {renderStep()}
         </div>
       </div>

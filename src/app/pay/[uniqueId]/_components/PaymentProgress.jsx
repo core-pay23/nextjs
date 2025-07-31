@@ -16,10 +16,10 @@ const PaymentProgress = ({ currentStep }) => {
   const currentIndex = getCurrentStepIndex();
 
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       {/* Progress Container - Centered with max width */}
       <div className="flex items-center justify-center">
-        <div className="flex items-center justify-center w-full max-w-lg mx-auto">
+        <div className="flex items-center justify-center w-full max-w-md mx-auto">
           {steps.map((step, index) => (
             <React.Fragment key={step.id}>
               {/* Step Circle and Label Container */}
@@ -27,8 +27,8 @@ const PaymentProgress = ({ currentStep }) => {
                 {/* Step Circle */}
                 <div
                   className={`
-                    w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] 
-                    rounded-full flex items-center justify-center text-sm font-medium
+                    w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] 
+                    rounded-full flex items-center justify-center text-xs font-medium
                     transition-all duration-300 ease-in-out relative flex-shrink-0
                     ${
                       index <= currentIndex
@@ -39,7 +39,7 @@ const PaymentProgress = ({ currentStep }) => {
                 >
                   {index < currentIndex ? (
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -50,12 +50,12 @@ const PaymentProgress = ({ currentStep }) => {
                       />
                     </svg>
                   ) : (
-                    <span className="text-sm font-semibold">{index + 1}</span>
+                    <span className="text-xs font-semibold">{index + 1}</span>
                   )}
                 </div>
                 
                 {/* Step Label */}
-                <div className="mt-3 text-center">
+                <div className="mt-2 text-center">
                   <div
                     className={`
                       text-xs font-medium transition-colors duration-300 whitespace-nowrap
@@ -73,7 +73,7 @@ const PaymentProgress = ({ currentStep }) => {
 
               {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div className="flex-1 min-w-[80px] mx-4 mb-4">
+                <div className="flex-1 min-w-[60px] mx-3 mb-3">
                   <div
                     className={`
                       h-0.5 transition-colors duration-300 relative

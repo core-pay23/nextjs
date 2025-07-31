@@ -97,10 +97,10 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white mb-2">
+        <h1 className="text-xl font-semibold text-white mb-2">
           Confirm Payment
         </h1>
-        <p className="text-white/60">
+        <p className="text-sm text-white/60">
           Review and confirm your transaction
         </p>
       </div>

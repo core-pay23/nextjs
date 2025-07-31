@@ -34,17 +34,17 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-semibold text-white mb-2">
+        <h1 className="text-xl font-semibold text-white mb-2">
           Payment Successful!
         </h1>
-        <p className="text-white/60">
+        <p className="text-sm text-white/60">
           Your transaction has been confirmed on the blockchain
         </p>
       </div>
 
       {/* Transaction Details */}
       <div className="bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4">
-        <h2 className="text-lg font-medium text-white">Transaction Details</h2>
+        <h2 className="text-base font-medium text-white">Transaction Details</h2>
         
         {/* Amount Sent */}
         <div className="space-y-3">
@@ -83,24 +83,15 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
           </div>
         </div>
 
-        {/* Payment ID */}
-        <div className="space-y-2">
-          <div className="text-sm text-white/60">Payment ID</div>
-          <div className="bg-slate-700/40 p-3 rounded-lg border border-white/5">
-            <div className="text-white text-sm font-mono">
-              {paymentData.uniqueId}
-            </div>
-          </div>
-        </div>
-
         {/* Status */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <div className="text-sm text-white/60">Status</div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-green-400 font-medium text-sm">Confirmed</span>
           </div>
-        </div>
+        </div> */}
+
       </div>
 
       {/* Action Buttons */}
@@ -166,7 +157,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
-          <span>Transaction secured by Lisk blockchain</span>
+          <span>Secured by Koneksi</span>
         </div>
       </div>
     </div>

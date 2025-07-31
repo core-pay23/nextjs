@@ -32,17 +32,17 @@ const PaymentReview = ({ paymentData, onNext }) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white mb-2">
+        <h1 className="text-xl font-semibold text-white mb-2">
           Review Payment
         </h1>
-        <p className="text-white/60">
+        <p className="text-sm text-white/60">
           Please review the payment details before proceeding
         </p>
       </div>
 
       {/* Payment Details Card */}
       <div className="bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4">
-        <h2 className="text-lg font-medium text-white">Payment Details</h2>
+        <h2 className="text-base font-medium text-white">Payment Details</h2>
         
         {/* Token and Amount */}
         <div className="space-y-3">
@@ -65,22 +65,13 @@ const PaymentReview = ({ paymentData, onNext }) => {
                 </svg>
               </div>
               <div>
-                <div className="text-white font-medium">Recipient</div>
-                <div className="text-white/60 text-sm">{formatAddress(recipientAddress)}</div>
+                <div className="text-white text-sm font-medium">Recipient</div>
+                <div className="text-white/60 text-xs">{formatAddress(recipientAddress)}</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Payment ID */}
-        <div className="space-y-2">
-          <div className="text-sm text-white/60">Payment ID</div>
-          <div className="bg-slate-700/40 p-3 rounded-lg">
-            <div className="text-white text-sm font-mono">
-              {paymentData.uniqueId}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Wallet Status Notice */}
