@@ -21,4 +21,16 @@ model User {
   EoaAddress String @unique // Unique EOA address
   EoaPrivateKey String? // Optional EOA private key for client-side operations
   salt String // Salt for cryptographic operations
+  payments Payment[] // One-to-many relationship with Payment
+}
+
+model Payment {
+  id Int @id @default(autoincrement())
+  uniqueId String @unique // Unique identifier for the payment
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amount Float // Amount of the payment
+  tokenAddress String // Token address for the payment
+  User User @relation(fields: [userId], references: [id])
+  userId Int // Foreign key to User
 }

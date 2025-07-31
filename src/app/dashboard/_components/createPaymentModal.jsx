@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import Modal from '@/components/Modal';
-import { DollarSignIcon, WalletIcon } from '@/components/dashboard/Icons';
-import { tokenList } from '@/lib/tokenlist';
+import { useState } from "react";
+import Modal from "@/components/Modal";
+import { DollarSignIcon, WalletIcon } from "@/components/dashboard/Icons";
+import { tokenList } from "@/lib/tokenlist";
 
 export default function CreatePaymentModal({ isOpen, onClose, onCreate }) {
-  const [token, setToken] = useState('');
-  const [amount, setAmount] = useState('');
+  const [token, setToken] = useState("");
+  const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -14,29 +14,37 @@ export default function CreatePaymentModal({ isOpen, onClose, onCreate }) {
 
     setIsLoading(true);
     try {
-      await onCreate({ token, amount: parseFloat(amount) });
-      setToken('');
-      setAmount('');
+      await onCreate({ tokenAddress: token, amount: parseFloat(amount) });
+      setToken("");
+      setAmount("");
       onClose();
     } catch (error) {
-      console.error('Error creating payment:', error);
+      console.error("Error creating payment:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setToken('');
-    setAmount('');
+    setToken("");
+    setAmount("");
     onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Create New Payment" size="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create New Payment"
+      size="md"
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Token Select */}
         <div>
-          <label htmlFor="token" className="block text-sm font-medium text-white/80 mb-2">
+          <label
+            htmlFor="token"
+            className="block text-sm font-medium text-white/80 mb-2"
+          >
             Select Token
           </label>
           <div className="relative">
@@ -83,7 +91,10 @@ export default function CreatePaymentModal({ isOpen, onClose, onCreate }) {
 
         {/* Amount Input */}
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-white/80 mb-2">
+          <label
+            htmlFor="amount"
+            className="block text-sm font-medium text-white/80 mb-2"
+          >
             Amount
           </label>
           <div className="relative">
@@ -118,7 +129,7 @@ export default function CreatePaymentModal({ isOpen, onClose, onCreate }) {
             disabled={isLoading || !token || !amount}
             className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium"
           >
-            {isLoading ? 'Creating...' : 'Create Payment'}
+            {isLoading ? "Creating..." : "Create Payment"}
           </button>
         </div>
       </form>

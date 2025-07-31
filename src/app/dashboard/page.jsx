@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { useEOAAddress } from "@/hooks";
 import StatCard from "@/components/dashboard/StatCard";
 import DebitCard from "@/components/dashboard/DebitCard";
@@ -22,15 +22,16 @@ import { ChevronDown } from "react-feather";
 
 export default function DashboardPage() {
   const { isConnected } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
-  const [isCreatePaymentModalOpen, setIsCreatePaymentModalOpen] = useState(false);
+  const [isCreatePaymentModalOpen, setIsCreatePaymentModalOpen] =
+    useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
 
   useEffect(() => {
     if (!isConnected) {
@@ -49,9 +50,44 @@ export default function DashboardPage() {
   }
 
   const handleCreatePayment = async (paymentData) => {
-    // Handle payment creation logic here
-    console.log('Creating payment:', paymentData);
-    // Example: await createPaymentAPI(paymentData);
+    console.log(paymentData);
+    try {
+      // Create message to sign
+      const message = `Create payment request: ${paymentData.amount} ${
+        paymentData.tokenAddress
+      } to ${clientWalletAddress} at ${Date.now()}`;
+
+      // Sign the message
+      const signedMessage = await signMessageAsync({ message });
+
+      const response = await fetch("/api/create-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...paymentData,
+          clientWalletAddress,
+          signedMessage,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create payment");
+      }
+
+      const result = await response.json();
+      console.log("Payment created successfully:", result);
+
+      // Close modal on success
+      setIsCreatePaymentModalOpen(false);
+
+      return result;
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      throw error;
+    }
   };
 
   return (
@@ -65,8 +101,13 @@ export default function DashboardPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Debit/Credit Card Style Component */}
-        <DebitCard title="Wallet" value="$0.27" 
-        eoaAddress={eoaAddress} loading={loading} error={error} clientWalletAddress={clientWalletAddress}
+        <DebitCard
+          title="Wallet"
+          value="$0.27"
+          eoaAddress={eoaAddress}
+          loading={loading}
+          error={error}
+          clientWalletAddress={clientWalletAddress}
         />
 
         <StatCard
