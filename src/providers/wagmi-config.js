@@ -3,39 +3,39 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { defineChain } from "viem";
 
-// Define Lisk Sepolia chain
-export const liskSepolia = defineChain({
-  id: 4202,
-  name: "Lisk Sepolia Testnet",
-  network: "lisk-sepolia",
+// Define Somnia Testnet chain
+export const somniaTestnet = defineChain({
+  id: 50312,
+  name: "Somnia Testnet",
+  network: "somnia-testnet",
   nativeCurrency: {
     decimals: 18,
-    name: "Ether",
-    symbol: "ETH",
+    name: "STT",
+    symbol: "STT",
   },
   rpcUrls: {
-    public: { http: ["https://rpc.sepolia-api.lisk.com"] },
-    default: { http: ["https://rpc.sepolia-api.lisk.com"] },
+    public: { http: ["https://rpc.ankr.com/somnia_testnet/6e3fd81558cf77b928b06b38e9409b4677b637118114e83364486294d5ff4811"] },
+    default: { http: ["https://rpc.ankr.com/somnia_testnet/6e3fd81558cf77b928b06b38e9409b4677b637118114e83364486294d5ff4811"] },
   },
   blockExplorers: {
     blockscout: {
       name: "Blockscout",
-      url: "https://sepolia-blockscout.lisk.com",
+      url: "https://shannon-explorer.somnia.network/",
     },
     default: {
       name: "Blockscout",
-      url: "https://sepolia-blockscout.lisk.com",
+      url: "https://shannon-explorer.somnia.network/",
     },
   },
   testnet: true,
 });
 
-export const liskWagmiConfig = getDefaultConfig({
+export const somniaWagmiConfig = getDefaultConfig({
   appName: "My RainbowKit App",
   projectId:
     process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "YOUR_PROJECT_ID",
-  chains: [liskSepolia],
+  chains: [somniaTestnet],
   ssr: false,
 });
 
-export default liskWagmiConfig;
+export default somniaWagmiConfig;

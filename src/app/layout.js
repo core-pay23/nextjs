@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Lisk Payment Gateway",
+  title: "Payment Gateway",
   description: "Web3 payment gateway with music production analytics dashboard",
 };
 

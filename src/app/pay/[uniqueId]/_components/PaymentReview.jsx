@@ -1,5 +1,6 @@
 "use client";
 
+import { somniaTestnet } from "viem/chains";
 import TokenDisplay from "./TokenDisplay";
 import { useWallet } from "@/hooks/useWallet";
 
@@ -7,7 +8,7 @@ const PaymentReview = ({ paymentData, onNext }) => {
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
   const { isConnected, openConnectModal, chainId } = useWallet();
-  const requiredChainId = 4202; // Lisk Sepolia
+  const requiredChainId = somniaTestnet.id;
   const isCorrectNetwork = chainId === requiredChainId;
 
   const handleProceed = () => {
@@ -100,7 +101,7 @@ const PaymentReview = ({ paymentData, onNext }) => {
             <div>
               <div className="text-amber-400 font-medium text-sm">Network Switch Required</div>
               <div className="text-amber-200/80 text-sm mt-1">
-                Please switch to Lisk Sepolia network to complete the payment.
+                Please switch to Somnia network to complete the payment.
               </div>
             </div>
           </div>

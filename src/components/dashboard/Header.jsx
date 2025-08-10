@@ -11,6 +11,7 @@ import {
 import { parseUnits } from "viem";
 import { toast } from "react-toastify";
 import { mockUSDCAddress, mockUSDCAbi } from "@/lib/contracts/mockUSDC";
+import { somniaTestnet } from "viem/chains";
 
 export default function Header() {
   const { address, isConnected } = useAccount();
@@ -26,7 +27,7 @@ export default function Header() {
   console.log(error, isConfirming, isConfirmed, isPending)
   console.log(isError, failureReason, receiptError)
 
-  const requiredChainId = 4202; // Lisk Sepolia
+  const requiredChainId = somniaTestnet.id; // Somnia
   const isCorrectNetwork = chainId === requiredChainId;
 
   // Handle transaction status updates with toast notifications
@@ -119,7 +120,7 @@ export default function Header() {
     }
 
     if (!isCorrectNetwork) {
-      toast.error("Please switch to Lisk Sepolia network", {
+      toast.error("Please switch to Somnia network", {
         position: "bottom-right",
         autoClose: 3000,
       });

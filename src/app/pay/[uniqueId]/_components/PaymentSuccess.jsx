@@ -16,7 +16,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
     }
   };
 
-  const explorerUrl = `https://sepolia-blockscout.lisk.com/tx/${transactionHash}`;
+  const explorerUrl = `https://sepolia-blockscout.Somnia.com/tx/${transactionHash}`;
 
   return (
     <div className="space-y-6">

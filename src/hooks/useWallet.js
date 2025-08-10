@@ -1,6 +1,7 @@
 import { useAccount, useConnect, useDisconnect, useBalance, useChainId, useSwitchChain } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useQuery } from '@tanstack/react-query';
+import { somniaTestnet } from 'viem/chains';
 
 // Hook for wallet connection state and actions
 export const useWallet = () => {
@@ -144,11 +145,11 @@ export const useNetwork = () => {
   const { switchChain, isLoading: isSwitching, error } = useSwitchChain();
   
   const supportedChains = {
-    4202: 'Lisk Sepolia Testnet',
+    [somniaTestnet.id]: 'Somnia Testnet',
   };
 
   const currentNetwork = supportedChains[chainId] || 'Unknown Network';
-  const isTestnet = chainId === 4202;
+  const isTestnet = chainId === somniaTestnet.id;
 
   return {
     chainId,

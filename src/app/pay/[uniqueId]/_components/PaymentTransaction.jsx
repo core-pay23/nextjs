@@ -8,6 +8,7 @@ import { tokenList } from "@/lib/tokenlist";
 import { parseUnits, formatUnits } from "viem";
 import Image from "next/image";
 import CustomConnectButton from "./CustomConnectButton";
+import { somniaTestnet } from "viem/chains";
 
 const PaymentTransaction = ({ paymentData, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -16,7 +17,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   const { address, isConnected, openConnectModal, switchChain, chainId, disconnect } = useWallet();
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
-  const requiredChainId = 4202; // Lisk Sepolia
+  const requiredChainId = somniaTestnet.id;
   const isCorrectNetwork = chainId === requiredChainId;
 
   // Get token info
@@ -102,7 +103,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     }
 
     if (!isCorrectNetwork) {
-      setError("Please switch to Lisk Sepolia network");
+      setError("Please switch to Somnia network");
       return;
     }
 
@@ -182,13 +183,13 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             <div className="flex-1">
               <div className="text-amber-400 font-medium text-sm">Wrong Network</div>
               <div className="text-amber-200/80 text-sm mt-1">
-                Please switch to Lisk Sepolia network to continue.
+                Please switch to Somnia network to continue.
               </div>
               <button
                 onClick={handleSwitchNetwork}
                 className="mt-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-lg text-sm transition-colors"
               >
-                Switch to Lisk Sepolia
+                Switch to Somnia
               </button>
             </div>
           </div>
@@ -233,7 +234,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
                   {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
                 </div>
                 <div className="text-white/60 text-xs">
-                  {chainId === 4202 ? 'Lisk Sepolia Testnet' : `Chain ID: ${chainId}`}
+                  {chainId === somniaTestnet.id ? 'Somnia Testnet' : `Chain ID: ${chainId}`}
                 </div>
               </div>
             </div>
