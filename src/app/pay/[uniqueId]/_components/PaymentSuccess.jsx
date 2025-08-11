@@ -3,6 +3,7 @@
 import { useState } from "react";
 import TokenDisplay from "./TokenDisplay";
 import Image from "next/image";
+import { somniaTestnet } from "@/providers/wagmi-config";
 
 const PaymentSuccess = ({ paymentData, transactionHash }) => {
   const [copied, setCopied] = useState(false);
@@ -16,7 +17,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
     }
   };
 
-  const explorerUrl = `https://sepolia-blockscout.Somnia.com/tx/${transactionHash}`;
+  const explorerUrl = `${somniaTestnet.blockExplorers.default.url}/tx/${transactionHash}`;
 
   return (
     <div className="space-y-6">

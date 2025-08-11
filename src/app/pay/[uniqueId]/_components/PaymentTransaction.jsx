@@ -42,17 +42,6 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     token?.native ? null : tokenAddress
   );
 
-  // console.log('Wallet and balance data:', { 
-  //   address, 
-  //   isConnected, 
-  //   chainId, 
-  //   balance, 
-  //   balanceLoading, 
-  //   token, 
-  //   amount,
-  //   tokenAddress 
-  // });
-
   const handleConnectWallet = () => {
     openConnectModal?.();
   };
@@ -125,6 +114,8 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             const txCreatedLog = parsedLogs.find(
               (log) => log.eventName === "TransactionCreated"
             );
+            console.log("Parsed logs:", parsedLogs);
+            console.log(txCreatedLog);
             if (txCreatedLog && txCreatedLog.args && txCreatedLog.args.transactionId !== undefined) {
               extractedTransactionId = txCreatedLog.args.transactionId.toString();
             }
@@ -140,12 +131,29 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         }
         console.log("Transaction ID extracted:", extractedTransactionId);
         setTransactionId(extractedTransactionId);
-        setTransactionStep('pay');
+
+        // Immediately pay the transaction after extracting the transaction ID
+        try {
+          writeContract({
+            address: PaymentGatewayAddress,
+            abi: PaymentGatewayAbi,
+            functionName: "payTransaction",
+            args: [extractedTransactionId],
+            value: contractParams.token?.native ? contractParams.totalPayment : undefined,
+          });
+          // Do NOT setTransactionStep('pay') here; wait for receipt confirmation
+        } catch (err) {
+          setError(err.message || "Failed to pay transaction");
+          setIsProcessing(false);
+        }
       } else if (transactionStep === 'pay') {
         // Payment completed successfully
         console.log("Payment transaction completed successfully");
         setIsProcessing(false);
         onSuccess(hash); // Pass the transaction hash to onSuccess
+      } else if (transactionStep === 'create' && transactionId && isConfirmed && receipt) {
+        // This block is reached after payTransaction is confirmed
+        setTransactionStep('pay');
       }
     }
   }, [writeError, receiptError, isConfirmed, receipt, transactionStep, onSuccess, hash]);
@@ -381,7 +389,16 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             </svg>
             <div>
               <div className="text-red-400 font-medium text-sm">Transaction Error</div>
-              <div className="text-red-200/80 text-sm mt-1">{error}</div>
+              <div className="text-red-200/80 text-sm mt-1 break-all">
+              {error &&
+                (typeof error === "string"
+                  ? error.includes("User rejected the request.")
+                    ? "User rejected the request."
+                    : error
+                  : error.message && error.message.includes("User rejected the request.")
+                    ? "User rejected the request."
+                    : error.message || String(error))}
+              </div>
             </div>
           </div>
         </div>
