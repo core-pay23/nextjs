@@ -13,10 +13,12 @@ import {
   PaymentGatewayAbi,
   PaymentGatewayAddress,
 } from "@/lib/contracts/paymentGateway.js";
+import { erc20Abi } from "@/lib/contracts/erc20.js";
 import { parseEventLogs } from "viem";
 
 const TRANSACTION_STEP = {
   CREATE_TRANSACTION: "create",
+  ALLOW_TRANSACTION: "allow",
   PAY_TRANSACTION: "pay",
 };
 
@@ -45,6 +47,32 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     writeContract: payWriteContract,
     isError: isPayError,
   } = useWriteContract();
+
+  const {
+    isLoading: isPayConfirming,
+    isSuccess: isPayConfirmed,
+    error: payReceiptError,
+    data: payReceipt,
+  } = useWaitForTransactionReceipt({
+    hash: payHash,
+  });
+
+  // Add new hook for ERC20 approve
+  const {
+    data: approveHash,
+    error: approveError,
+    writeContract: approveWriteContract,
+    isError: isApproveError,
+  } = useWriteContract();
+
+  const {
+    isLoading: isApproveConfirming,
+    isSuccess: isApproveConfirmed,
+    error: approveReceiptError,
+    data: approveReceipt,
+  } = useWaitForTransactionReceipt({
+    hash: approveHash,
+  });
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
@@ -136,6 +164,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       setError(receiptError.message || "Transaction failed");
       setIsProcessing(false);
     }
+
     switch (transactionStep) {
       case "create":
         if (!isConfirmed && !receipt) return;
@@ -182,30 +211,99 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         }
         console.log("Transaction ID extracted:", extractedTransactionId);
         setTransactionId(extractedTransactionId);
-        setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
+
+        // Move to allowance step only for ERC20 tokens, skip for native tokens
+        if (token && !token.native) {
+          console.log(`do 1`);
+          setTransactionStep(TRANSACTION_STEP.ALLOW_TRANSACTION);
+        } else {
+          console.log(`do 2`);
+          setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
+        }
         break;
+
+      case "allow":
+        // Automatically trigger approval when entering this step
+        if (!approveHash && token && !token.native) {
+          console.log("Automatically triggering token approval...");
+          triggerApproval();
+        }
+
+        // Handle approve errors
+        console.log(`do allow`);
+        if (approveError) {
+          console.error("Approve contract error:", approveError);
+          setError(approveError.message || "Approval failed");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Handle approve receipt errors
+        if (approveReceiptError) {
+          console.error("Approve receipt error:", approveReceiptError);
+          setError(approveReceiptError.message || "Approval failed");
+          setIsProcessing(false);
+          return;
+        }
+
+        // If approval is confirmed, move to payment step
+        if (isApproveConfirmed && approveReceipt) {
+          console.log("Token approval confirmed");
+          setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
+        }
+        break;
+
       case "pay":
-        if (!payHash) {
+        // Only initiate payment if we don't have a hash yet
+        if (!payHash && transactionId && contractParams) {
           // Use contractParams from state, but ensure it's up-to-date
           const value = contractParams.token?.native
             ? contractParams.totalPayment
             : undefined;
+
+          // Determine which function to call based on token type
+          const functionName = contractParams.token?.native
+            ? "payTransaction"
+            : "payTransactionWithToken";
+
+          // Prepare arguments
+          const args = [transactionId]; // Both functions take the same argument
+
           const writePayData = {
             address: PaymentGatewayAddress,
             abi: PaymentGatewayAbi,
-            functionName: "payTransaction",
-            args: [transactionId],
-            value,
+            functionName,
+            args,
+            value, // Only set for native token payments
           };
           console.log(`writePayData vvvvv`);
           console.log(writePayData);
-          const payResult = payWriteContract(writePayData);
-          console.log("payResult:", payResult);
-          setIsProcessing(false);
+          payWriteContract(writePayData);
         }
 
-        if (payHash) {
-          console.log;
+        // Handle payment errors
+        if (payError) {
+          console.error("Payment contract error:", payError);
+          setError(payError.message || "Payment failed");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Handle payment receipt errors
+        if (payReceiptError && payHash) {
+          console.error("Payment receipt error:", payReceiptError);
+          setError(payReceiptError.message || "Payment failed");
+          setIsProcessing(false);
+          return;
+        }
+
+        // If payment is confirmed, call onSuccess
+        if (isPayConfirmed && payReceipt && payHash) {
+          console.log("Payment confirmed");
+          setIsProcessing(false);
+          if (onSuccess) {
+            onSuccess();
+          }
         }
         break;
       default:
@@ -219,7 +317,20 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     transactionStep,
     onSuccess,
     hash,
-    transactionStep,
+    transactionId,
+    contractParams,
+    approveError,
+    approveReceiptError,
+    isApproveConfirmed,
+    approveReceipt,
+    payError,
+    isPayError,
+    payHash,
+    isPayConfirmed,
+    payReceipt,
+    payReceiptError,
+    approveHash,
+    token
   ]);
 
   const handlePayment = async () => {
@@ -285,6 +396,78 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       console.error("Transaction error:", err);
       console.error("Error stack:", err.stack);
       setError(err.message || "Transaction failed");
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle token approval for ERC20 tokens
+  const handleApprove = async () => {
+    if (!token || token.native) {
+      // Skip approval for native tokens
+      setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const totalPayment = parseUnits(amount.toString(), token.decimals);
+
+      console.log("Preparing token approval with params:", {
+        tokenAddress,
+        PaymentGatewayAddress,
+        totalPayment: totalPayment.toString(),
+      });
+
+      // Call approve function on ERC20 token contract
+      const args = {
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [PaymentGatewayAddress, totalPayment],
+      };
+      console.log("Approve contract args:", args);
+      approveWriteContract(args);
+    } catch (err) {
+      console.error("Approval error:", err);
+      setError(err.message || "Approval failed");
+      setIsProcessing(false);
+    }
+  };
+
+  // New function to trigger approval automatically
+  const triggerApproval = async () => {
+    if (!token || token.native) {
+      // Skip approval for native tokens
+      setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const totalPayment = parseUnits(amount.toString(), token.decimals);
+
+      console.log("Preparing token approval with params:", {
+        tokenAddress,
+        PaymentGatewayAddress,
+        totalPayment: totalPayment.toString(),
+      });
+
+      // Call approve function on ERC20 token contract
+      const args = {
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [PaymentGatewayAddress, totalPayment],
+      };
+      console.log("Approve contract args:", args);
+      approveWriteContract(args);
+    } catch (err) {
+      console.error("Approval error:", err);
+      setError(err.message || "Approval failed");
       setIsProcessing(false);
     }
   };
@@ -547,7 +730,8 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           balanceLoading ||
           !isConnected ||
           !isCorrectNetwork ||
-          hasInsufficientBalance()
+          hasInsufficientBalance() ||
+          transactionStep === TRANSACTION_STEP.ALLOW_TRANSACTION
         }
         className="
           w-full bg-gradient-to-r from-blue-500 to-cyan-600 
@@ -593,6 +777,29 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           <span>Unable to Load Balance</span>
         ) : hasInsufficientBalance() ? (
           <span>Insufficient Balance</span>
+        ) : transactionStep === TRANSACTION_STEP.ALLOW_TRANSACTION ? (
+          <>
+            <svg
+              className="animate-spin w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            <span>Approving Token Spending...</span>
+          </>
         ) : (
           <>
             <svg
