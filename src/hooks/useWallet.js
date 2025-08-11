@@ -1,7 +1,7 @@
 import { useAccount, useConnect, useDisconnect, useBalance, useChainId, useSwitchChain } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useQuery } from '@tanstack/react-query';
-import { somniaTestnet } from 'viem/chains';
+import { somniaTestnet } from "@/providers/wagmi-config";
 
 // Hook for wallet connection state and actions
 export const useWallet = () => {
@@ -48,7 +48,7 @@ export const useWalletBalance = (token = null) => {
     enabled: isConnected && !!address,
   });
 
-  console.log("Balance Query:", balanceQuery);
+  // console.log("Balance Query:", balanceQuery);
 
   return {
     balance: balanceQuery.data,

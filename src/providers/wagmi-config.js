@@ -29,6 +29,31 @@ export const somniaTestnet = defineChain({
   },
   testnet: true,
 });
+// export const somniaTestnet = defineChain({
+//   id: 421614,
+//   name: "Arbitrum Sepolia",
+//   network: "arbitrum-sepolia",
+//   nativeCurrency: {
+//     decimals: 18,
+//     name: "ETH",
+//     symbol: "ETH",
+//   },
+//   rpcUrls: {
+//     public: { http: ["https://arbitrum-sepolia.api.onfinality.io/public"] },
+//     default: { http: ["https://arbitrum-sepolia.api.onfinality.io/public"] },
+//   },
+//   blockExplorers: {
+//     blockscout: {
+//       name: "Blockscout",
+//       url: "https://web3.okx.com/explorer/arbitrum-one/",
+//     },
+//     default: {
+//       name: "Blockscout",
+//       url: "https://web3.okx.com/explorer/arbitrum-one/",
+//     },
+//   },
+//   testnet: true,
+// });
 
 export const somniaWagmiConfig = getDefaultConfig({
   appName: "My RainbowKit App",

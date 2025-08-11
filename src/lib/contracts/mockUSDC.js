@@ -1,4 +1,4 @@
-export const mockUSDCAddress = "0x3a69529479f1190D80005A2BeE2eB452c288C1f7";
+export const mockUSDCAddress = "0x38E41E30e51423626351F35B11f37a1f5aE4e2E8";
 
 export const mockUSDCAbi = [
   {

@@ -5,6 +5,8 @@ import { useAccount, useSignMessage } from "wagmi";
 import { useRouter } from "next/navigation";
 import Header from "./Header";
 import ConnectWalletCard from "./ConnectWalletCard";
+import { somniaTestnet } from "@/providers/wagmi-config";
+import { useWallet } from "@/hooks";
 
 // Check if signature exists and is valid
 const checkSignature = async () => {
@@ -53,7 +55,8 @@ const saveSignature = async (signature, address) => {
 
 export default function DashboardLayout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isConnected, address } = useAccount();
+  const { isConnected, address, chainId } = useAccount();
+  const { switchChain, disconnect } = useWallet();
   const { signMessage } = useSignMessage();
   const [isSigning, setIsSigning] = useState(false);
   const [hasValidSignature, setHasValidSignature] = useState(false);

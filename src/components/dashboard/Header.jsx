@@ -11,7 +11,7 @@ import {
 import { parseUnits } from "viem";
 import { toast } from "react-toastify";
 import { mockUSDCAddress, mockUSDCAbi } from "@/lib/contracts/mockUSDC";
-import { somniaTestnet } from "viem/chains";
+import { somniaTestnet } from "@/providers/wagmi-config";
 
 export default function Header() {
   const { address, isConnected } = useAccount();

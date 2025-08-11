@@ -1,24 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useWalletBalance } from "@/hooks/useWallet";
 import TokenDisplay from "./TokenDisplay";
 import { tokenList } from "@/lib/tokenlist";
 import { parseUnits, formatUnits } from "viem";
+import { useWriteContract, useWaitForTransactionReceipt, useAccountEffect } from "wagmi";
 import Image from "next/image";
-import CustomConnectButton from "./CustomConnectButton";
-import { somniaTestnet } from "viem/chains";
+import { somniaTestnet } from "@/providers/wagmi-config";
+import { PaymentGatewayAbi, PaymentGatewayAddress } from "@/lib/contracts/paymentGateway.js";
+import { parseEventLogs } from "viem";
 
 const PaymentTransaction = ({ paymentData, onSuccess }) => {
+  const { data: hash, error: writeError, isPending, writeContract, isError, failureReason } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError, data: receipt } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [transactionStep, setTransactionStep] = useState('create'); // 'create' or 'pay'
+  const [transactionId, setTransactionId] = useState(null);
+  const [contractParams, setContractParams] = useState({});
   
   const { address, isConnected, openConnectModal, switchChain, chainId, disconnect } = useWallet();
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
   const requiredChainId = somniaTestnet.id;
-  const isCorrectNetwork = chainId === requiredChainId;
+  const isCorrectNetwork = somniaTestnet.id === chainId;
+  
+  console.log(`chain ID : ${chainId}`)
 
   // Get token info
   const token = tokenList.find(
@@ -30,16 +42,16 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     token?.native ? null : tokenAddress
   );
 
-  console.log('Wallet and balance data:', { 
-    address, 
-    isConnected, 
-    chainId, 
-    balance, 
-    balanceLoading, 
-    token, 
-    amount,
-    tokenAddress 
-  });
+  // console.log('Wallet and balance data:', { 
+  //   address, 
+  //   isConnected, 
+  //   chainId, 
+  //   balance, 
+  //   balanceLoading, 
+  //   token, 
+  //   amount,
+  //   tokenAddress 
+  // });
 
   const handleConnectWallet = () => {
     openConnectModal?.();
@@ -54,35 +66,20 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   };
 
   const hasInsufficientBalance = () => {
-    console.log('=== hasInsufficientBalance Debug ===');
-    console.log('Function called');
-    console.log('Raw values:', { balance, token, amount });
-    console.log('Balance exists:', !!balance);
-    console.log('Token exists:', !!token);
     
     if (!token) {
-      console.log('❌ No token data - returning true (block transaction)');
       return true; // Block transaction if no token
     }
     
     if (!balance || balance === undefined) {
-      console.log('❌ No balance data - returning true (block transaction)');
       return true; // Block transaction if balance not loaded
     }
     
-    console.log('✅ Both balance and token exist, proceeding with calculation...');
-    console.log('Token decimals:', token.decimals);
-    console.log('Amount (raw):', amount, 'Type:', typeof amount);
-    
     try {
       const requiredAmount = parseUnits(amount.toString(), token.decimals);
-      console.log('Required amount (wei):', requiredAmount.toString());
-      console.log('Wallet balance (wei):', balance.value?.toString());
-      console.log('Balance value type:', typeof balance.value);
-      
       const insufficient = balance.value < requiredAmount;
-      console.log('Is insufficient?', insufficient);
-      console.log('================================');
+      // console.log('Is insufficient?', insufficient);
+      // console.log(`chain ID ${chainId}`)
       
       return insufficient;
     } catch (error) {
@@ -95,6 +92,76 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     if (!balance || !token) return "0";
     return `${parseFloat(formatUnits(balance.value, token.decimals)).toFixed(4)} ${token.symbol}`;
   };
+
+  // Handle transaction flow with useEffect
+  useEffect(() => {
+    // Handle write contract errors
+    if (writeError) {
+      console.error("Write contract error:", writeError);
+      setError(writeError.message || "Transaction failed");
+      setIsProcessing(false);
+    }
+    
+    // Handle receipt errors
+    if (receiptError) {
+      console.error("Receipt error:", receiptError);
+      setError(receiptError.message || "Transaction failed");
+      setIsProcessing(false);
+    }
+    
+    // Handle successful transaction confirmation
+    if (isConfirmed && receipt) {
+      console.log("Transaction confirmed:", receipt);
+
+      if (transactionStep === 'create') {
+        // Extract transaction ID from the TransactionCreated event log using viem
+        let extractedTransactionId = null;
+        try {
+          if (receipt.logs && receipt.logs.length > 0) {
+            const parsedLogs = parseEventLogs({
+              abi: PaymentGatewayAbi,
+              logs: receipt.logs,
+            });
+            const txCreatedLog = parsedLogs.find(
+              (log) => log.eventName === "TransactionCreated"
+            );
+            if (txCreatedLog && txCreatedLog.args && txCreatedLog.args.transactionId !== undefined) {
+              extractedTransactionId = txCreatedLog.args.transactionId.toString();
+            }
+          }
+        } catch (err) {
+          console.error("Error decoding TransactionCreated event with viem:", err);
+        }
+        if (!extractedTransactionId) {
+          console.error("Could not find transactionId in receipt logs:", receipt.logs);
+          setError("Transaction ID not found in receipt logs. Check contract events.");
+          setIsProcessing(false);
+          return;
+        }
+        console.log("Transaction ID extracted:", extractedTransactionId);
+        setTransactionId(extractedTransactionId);
+        setTransactionStep('pay');
+      } else if (transactionStep === 'pay') {
+        // Payment completed successfully
+        console.log("Payment transaction completed successfully");
+        setIsProcessing(false);
+        onSuccess(hash); // Pass the transaction hash to onSuccess
+      }
+    }
+  }, [writeError, receiptError, isConfirmed, receipt, transactionStep, onSuccess, hash]);
+
+  // Handle the pay transaction step
+  useEffect(() => {
+    if (transactionStep === 'pay' && transactionId && !isPending && !isConfirming) {
+      writeContract({
+        address: PaymentGatewayAddress,
+        abi: PaymentGatewayAbi,
+        functionName: "payTransaction",
+        args: [transactionId],
+        value: contractParams.token?.native ? contractParams.totalPayment : undefined,
+      });
+    }
+  }, [transactionStep, transactionId, isPending, isConfirming, contractParams, writeContract]);
 
   const handlePayment = async () => {
     if (!isConnected) {
@@ -121,20 +188,44 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     setError(null);
 
     try {
-      // Simulate transaction processing
-      // In a real implementation, you would:
-      // 1. For native tokens: Use sendTransaction
-      // 2. For ERC20 tokens: Use writeContract with transfer function
-      
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate transaction time
-      
-      // Mock transaction hash
-      const mockTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
-      
-      onSuccess(mockTxHash);
+      // Prepare arguments for createTransaction
+      const originChain = somniaTestnet.id.toString();
+      const totalPayment = parseUnits(amount.toString(), token.decimals);
+      const shopOwner = recipientAddress;
+      const paymentToken = tokenAddress;
+
+      // Store contract params for use in the pay step
+      setContractParams({
+        PaymentGatewayAbi,
+        PaymentGatewayAddress,
+        originChain,
+        totalPayment,
+        shopOwner,
+        paymentToken,
+        token
+      });
+
+      console.log("Preparing createTransaction with params:", {
+        originChain,
+        totalPayment: totalPayment.toString(),
+        shopOwner,
+        paymentToken
+      });
+
+      // Call createTransaction
+      console.log("Calling createTransaction...");
+      const args = {
+        address: PaymentGatewayAddress,
+        abi: PaymentGatewayAbi,
+        functionName: "createTransaction",
+        args: [originChain, totalPayment, shopOwner, paymentToken],
+      }
+      console.log("Write contract args:", args);
+      writeContract(args);
     } catch (err) {
+      console.error("Transaction error:", err);
+      console.error("Error stack:", err.stack);
       setError(err.message || "Transaction failed");
-    } finally {
       setIsProcessing(false);
     }
   };

@@ -1,6 +1,5 @@
 "use client";
-
-import { somniaTestnet } from "viem/chains";
+import { somniaTestnet } from "@/providers/wagmi-config";
 import TokenDisplay from "./TokenDisplay";
 import { useWallet } from "@/hooks/useWallet";
 
