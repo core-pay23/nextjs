@@ -2,6 +2,7 @@
 import { somniaTestnet } from "@/providers/wagmi-config";
 import TokenDisplay from "./TokenDisplay";
 import { useWallet } from "@/hooks/useWallet";
+import { useEffect, useState } from "react";
 
 const PaymentReview = ({ paymentData, onNext }) => {
   const { amount, tokenAddress, User } = paymentData;
@@ -9,6 +10,11 @@ const PaymentReview = ({ paymentData, onNext }) => {
   const { isConnected, openConnectModal, chainId } = useWallet();
   const requiredChainId = somniaTestnet.id;
   const isCorrectNetwork = chainId === requiredChainId;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleProceed = () => {
     if (!isConnected) {
@@ -27,6 +33,11 @@ const PaymentReview = ({ paymentData, onNext }) => {
     if (!addr) return "Unknown";
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
+
+  if (!mounted) {
+    // Render a placeholder or nothing until mounted on client
+    return null;
+  }
 
   return (
     <div className="space-y-6">

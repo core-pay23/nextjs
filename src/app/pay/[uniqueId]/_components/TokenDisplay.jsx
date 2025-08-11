@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const TokenDisplay = ({ tokenAddress, amount, className = "" }) => {
   const [imageError, setImageError] = useState(false);
-  
+
   const token = tokenList.find(
     (t) => t.address.toLowerCase() === tokenAddress.toLowerCase()
   );
@@ -28,7 +28,7 @@ const TokenDisplay = ({ tokenAddress, amount, className = "" }) => {
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-700 flex items-center justify-center relative">
-        {!imageError ? (
+        {!imageError && token.logoURI && typeof token.logoURI === 'string' && token.logoURI.trim() !== '' ? (
           <Image
             src={token.logoURI}
             alt={token.name}

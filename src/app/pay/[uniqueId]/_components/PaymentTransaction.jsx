@@ -6,41 +6,82 @@ import { useWalletBalance } from "@/hooks/useWallet";
 import TokenDisplay from "./TokenDisplay";
 import { tokenList } from "@/lib/tokenlist";
 import { parseUnits, formatUnits } from "viem";
-import { useWriteContract, useWaitForTransactionReceipt, useAccountEffect } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import Image from "next/image";
 import { somniaTestnet } from "@/providers/wagmi-config";
-import { PaymentGatewayAbi, PaymentGatewayAddress } from "@/lib/contracts/paymentGateway.js";
+import {
+  PaymentGatewayAbi,
+  PaymentGatewayAddress,
+} from "@/lib/contracts/paymentGateway.js";
 import { parseEventLogs } from "viem";
 
+const TRANSACTION_STEP = {
+  CREATE_TRANSACTION: "create",
+  PAY_TRANSACTION: "pay",
+};
+
 const PaymentTransaction = ({ paymentData, onSuccess }) => {
-  const { data: hash, error: writeError, isPending, writeContract, isError, failureReason } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError, data: receipt } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const {
+    data: hash,
+    error: writeError,
+    isPending,
+    writeContract,
+    isError,
+    failureReason,
+  } = useWriteContract();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: receiptError,
+    data: receipt,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const {
+    data: payHash,
+    error: payError,
+    writeContract: payWriteContract,
+    isError: isPayError,
+  } = useWriteContract();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [transactionStep, setTransactionStep] = useState('create'); // 'create' or 'pay'
+  const [transactionStep, setTransactionStep] = useState(
+    TRANSACTION_STEP.CREATE_TRANSACTION
+  );
   const [transactionId, setTransactionId] = useState(null);
   const [contractParams, setContractParams] = useState({});
-  
-  const { address, isConnected, openConnectModal, switchChain, chainId, disconnect } = useWallet();
+
+  const {
+    address,
+    isConnected,
+    openConnectModal,
+    switchChain,
+    chainId,
+    disconnect,
+  } = useWallet();
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
   const requiredChainId = somniaTestnet.id;
   const isCorrectNetwork = somniaTestnet.id === chainId;
-  
-  console.log(`chain ID : ${chainId}`)
 
   // Get token info
   const token = tokenList.find(
     (t) => t.address.toLowerCase() === tokenAddress.toLowerCase()
   );
-
   // Get wallet balance for the specific token
   const { balance, isLoading: balanceLoading } = useWalletBalance(
     token?.native ? null : tokenAddress
   );
+
+  const formatBalance = () => {
+    if (!balance || !token) return "0";
+    return `${parseFloat(formatUnits(balance.value, token.decimals)).toFixed(
+      4
+    )} ${token.symbol}`;
+  };
 
   const handleConnectWallet = () => {
     openConnectModal?.();
@@ -55,56 +96,52 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   };
 
   const hasInsufficientBalance = () => {
-    
     if (!token) {
       return true; // Block transaction if no token
     }
-    
+
     if (!balance || balance === undefined) {
       return true; // Block transaction if balance not loaded
     }
-    
+
     try {
       const requiredAmount = parseUnits(amount.toString(), token.decimals);
       const insufficient = balance.value < requiredAmount;
       // console.log('Is insufficient?', insufficient);
       // console.log(`chain ID ${chainId}`)
-      
+
       return insufficient;
     } catch (error) {
-      console.error('Error in balance calculation:', error);
+      console.error("Error in balance calculation:", error);
       return true; // Block transaction on error
     }
   };
 
-  const formatBalance = () => {
-    if (!balance || !token) return "0";
-    return `${parseFloat(formatUnits(balance.value, token.decimals)).toFixed(4)} ${token.symbol}`;
-  };
-
-  // Handle transaction flow with useEffect
   useEffect(() => {
-    // Handle write contract errors
     if (writeError) {
       console.error("Write contract error:", writeError);
       setError(writeError.message || "Transaction failed");
       setIsProcessing(false);
     }
-    
     // Handle receipt errors
     if (receiptError) {
+      // Move formatBalance inside the component to access balance and token
+      const formatBalance = () => {
+        if (!balance || !token) return "0";
+        return `${parseFloat(
+          formatUnits(balance.value, token.decimals)
+        ).toFixed(4)} ${token.symbol}`;
+      };
       console.error("Receipt error:", receiptError);
       setError(receiptError.message || "Transaction failed");
       setIsProcessing(false);
     }
-    
-    // Handle successful transaction confirmation
-    if (isConfirmed && receipt) {
-      console.log("Transaction confirmed:", receipt);
-
-      if (transactionStep === 'create') {
-        // Extract transaction ID from the TransactionCreated event log using viem
+    switch (transactionStep) {
+      case "create":
+        if (!isConfirmed && !receipt) return;
         let extractedTransactionId = null;
+
+        // extract create transaction ID
         try {
           if (receipt.logs && receipt.logs.length > 0) {
             const parsedLogs = parseEventLogs({
@@ -116,60 +153,74 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             );
             console.log("Parsed logs:", parsedLogs);
             console.log(txCreatedLog);
-            if (txCreatedLog && txCreatedLog.args && txCreatedLog.args.transactionId !== undefined) {
-              extractedTransactionId = txCreatedLog.args.transactionId.toString();
+            if (
+              txCreatedLog &&
+              txCreatedLog.args &&
+              txCreatedLog.args.transactionId !== undefined
+            ) {
+              extractedTransactionId =
+                txCreatedLog.args.transactionId.toString();
             }
           }
         } catch (err) {
-          console.error("Error decoding TransactionCreated event with viem:", err);
+          console.error(
+            "Error decoding TransactionCreated event with viem:",
+            err
+          );
         }
+
         if (!extractedTransactionId) {
-          console.error("Could not find transactionId in receipt logs:", receipt.logs);
-          setError("Transaction ID not found in receipt logs. Check contract events.");
+          console.error(
+            "Could not find transactionId in receipt logs:",
+            receipt.logs
+          );
+          setError(
+            "Transaction ID not found in receipt logs. Check contract events."
+          );
           setIsProcessing(false);
           return;
         }
         console.log("Transaction ID extracted:", extractedTransactionId);
         setTransactionId(extractedTransactionId);
-
-        // Immediately pay the transaction after extracting the transaction ID
-        try {
-          writeContract({
+        setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
+        break;
+      case "pay":
+        if (!payHash) {
+          // Use contractParams from state, but ensure it's up-to-date
+          const value = contractParams.token?.native
+            ? contractParams.totalPayment
+            : undefined;
+          const writePayData = {
             address: PaymentGatewayAddress,
             abi: PaymentGatewayAbi,
             functionName: "payTransaction",
-            args: [extractedTransactionId],
-            value: contractParams.token?.native ? contractParams.totalPayment : undefined,
-          });
-          // Do NOT setTransactionStep('pay') here; wait for receipt confirmation
-        } catch (err) {
-          setError(err.message || "Failed to pay transaction");
+            args: [transactionId],
+            value,
+          };
+          console.log(`writePayData vvvvv`);
+          console.log(writePayData);
+          const payResult = payWriteContract(writePayData);
+          console.log("payResult:", payResult);
           setIsProcessing(false);
         }
-      } else if (transactionStep === 'pay') {
-        // Payment completed successfully
-        console.log("Payment transaction completed successfully");
-        setIsProcessing(false);
-        onSuccess(hash); // Pass the transaction hash to onSuccess
-      } else if (transactionStep === 'create' && transactionId && isConfirmed && receipt) {
-        // This block is reached after payTransaction is confirmed
-        setTransactionStep('pay');
-      }
-    }
-  }, [writeError, receiptError, isConfirmed, receipt, transactionStep, onSuccess, hash]);
 
-  // Handle the pay transaction step
-  useEffect(() => {
-    if (transactionStep === 'pay' && transactionId && !isPending && !isConfirming) {
-      writeContract({
-        address: PaymentGatewayAddress,
-        abi: PaymentGatewayAbi,
-        functionName: "payTransaction",
-        args: [transactionId],
-        value: contractParams.token?.native ? contractParams.totalPayment : undefined,
-      });
+        if (payHash) {
+          console.log;
+        }
+        break;
+      default:
+        break;
     }
-  }, [transactionStep, transactionId, isPending, isConfirming, contractParams, writeContract]);
+  }, [
+    writeError,
+    receiptError,
+    isConfirmed,
+    receipt,
+    transactionStep,
+    onSuccess,
+    hash,
+    transactionStep,
+  ]);
 
   const handlePayment = async () => {
     if (!isConnected) {
@@ -210,14 +261,14 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         totalPayment,
         shopOwner,
         paymentToken,
-        token
+        token,
       });
 
       console.log("Preparing createTransaction with params:", {
         originChain,
         totalPayment: totalPayment.toString(),
         shopOwner,
-        paymentToken
+        paymentToken,
       });
 
       // Call createTransaction
@@ -227,7 +278,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         abi: PaymentGatewayAbi,
         functionName: "createTransaction",
         args: [originChain, totalPayment, shopOwner, paymentToken],
-      }
+      };
       console.log("Write contract args:", args);
       writeContract(args);
     } catch (err) {
@@ -254,11 +305,21 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {!isConnected && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
           <div className="flex items-start space-x-3">
-            <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-red-500 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
             <div className="flex-1">
-              <div className="text-red-400 font-medium text-sm">Wallet Not Connected</div>
+              <div className="text-red-400 font-medium text-sm">
+                Wallet Not Connected
+              </div>
               <div className="text-red-200/80 text-sm mt-1">
                 Please connect your wallet to proceed with the payment.
               </div>
@@ -276,11 +337,21 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {isConnected && !isCorrectNetwork && (
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
           <div className="flex items-start space-x-3">
-            <svg className="w-5 h-5 text-amber-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-amber-500 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             <div className="flex-1">
-              <div className="text-amber-400 font-medium text-sm">Wrong Network</div>
+              <div className="text-amber-400 font-medium text-sm">
+                Wrong Network
+              </div>
               <div className="text-amber-200/80 text-sm mt-1">
                 Please switch to Somnia network to continue.
               </div>
@@ -298,7 +369,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {/* Transaction Summary */}
       <div className="bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4">
         <h2 className="text-lg font-medium text-white">Transaction Summary</h2>
-        
+
         {/* Amount */}
         <div className="space-y-3">
           <div className="text-sm text-white/60">You will send</div>
@@ -318,7 +389,6 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             </div>
           </div>
         </div> */}
-
       </div>
 
       {/* Connected Wallet Info */}
@@ -330,10 +400,14 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
               <div className="flex flex-col space-y-1">
                 <div className="text-white/60 text-xs">Connected Wallet</div>
                 <div className="text-white text-sm font-mono">
-                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''}
+                  {address
+                    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                    : ""}
                 </div>
                 <div className="text-white/60 text-xs">
-                  {chainId === somniaTestnet.id ? 'Somnia Testnet' : `Chain ID: ${chainId}`}
+                  {chainId === somniaTestnet.id
+                    ? "Somnia Testnet"
+                    : `Chain ID: ${chainId}`}
                 </div>
               </div>
             </div>
@@ -357,9 +431,24 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           <div className="text-white font-medium">
             {balanceLoading ? (
               <div className="flex items-center space-x-2">
-                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                <svg
+                  className="animate-spin w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 <span className="text-sm">Loading...</span>
               </div>
@@ -372,7 +461,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
             )}
           </div>
         </div>
-        
+
         {!balanceLoading && hasInsufficientBalance() && (
           <div className="mt-2 text-red-400 text-sm">
             Insufficient balance for this transaction
@@ -384,18 +473,29 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
           <div className="flex items-start space-x-3">
-            <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-red-500 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
             <div>
-              <div className="text-red-400 font-medium text-sm">Transaction Error</div>
+              <div className="text-red-400 font-medium text-sm">
+                Transaction Error
+              </div>
               <div className="text-red-200/80 text-sm mt-1 break-all">
-              {error &&
-                (typeof error === "string"
-                  ? error.includes("User rejected the request.")
-                    ? "User rejected the request."
-                    : error
-                  : error.message && error.message.includes("User rejected the request.")
+                {error &&
+                  (typeof error === "string"
+                    ? error.includes("User rejected the request.")
+                      ? "User rejected the request."
+                      : error
+                    : error.message &&
+                      error.message.includes("User rejected the request.")
                     ? "User rejected the request."
                     : error.message || String(error))}
               </div>
@@ -408,13 +508,32 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {isProcessing && (
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
           <div className="flex items-center space-x-3">
-            <svg className="animate-spin w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <svg
+              className="animate-spin w-5 h-5 text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             <div>
-              <div className="text-blue-400 font-medium text-sm">Processing Transaction</div>
-              <div className="text-blue-200/80 text-sm">Please wait while your transaction is being processed...</div>
+              <div className="text-blue-400 font-medium text-sm">
+                Processing Transaction
+              </div>
+              <div className="text-blue-200/80 text-sm">
+                Please wait while your transaction is being processed...
+              </div>
             </div>
           </div>
         </div>
@@ -423,7 +542,13 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {/* Payment Button */}
       <button
         onClick={handlePayment}
-        disabled={isProcessing || balanceLoading || !isConnected || !isCorrectNetwork || hasInsufficientBalance()}
+        disabled={
+          isProcessing ||
+          balanceLoading ||
+          !isConnected ||
+          !isCorrectNetwork ||
+          hasInsufficientBalance()
+        }
         className="
           w-full bg-gradient-to-r from-blue-500 to-cyan-600 
           hover:from-blue-600 hover:to-cyan-700 
@@ -437,9 +562,24 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       >
         {isProcessing ? (
           <>
-            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <svg
+              className="animate-spin w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             <span>Processing...</span>
           </>
@@ -455,8 +595,18 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           <span>Insufficient Balance</span>
         ) : (
           <>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
             </svg>
             <span>Confirm Payment</span>
           </>
@@ -466,14 +616,14 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
       {/* Security Notice */}
       <div className="text-center text-white/60 text-sm">
         <div className="flex items-center justify-center space-x-1">
-            <Image
-              src="/icon.svg"
-              alt="Koneksi Logo"
-              width={120}
-              height={120}
-              className="h-6 w-6"
-              priority
-            />
+          <Image
+            src="/icon.svg"
+            alt="Koneksi Logo"
+            width={120}
+            height={120}
+            className="h-6 w-6"
+            priority
+          />
           <span>Transaction Secured by Koneksi</span>
         </div>
       </div>
