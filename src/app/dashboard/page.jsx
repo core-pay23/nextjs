@@ -19,6 +19,8 @@ import {
   MoneyBillIcon,
 } from "@/components/dashboard/Icons";
 import { ChevronDown } from "react-feather";
+import { useMerchantTransactions } from "@/hooks/useMerchantTransactions";
+import { useMerchantBalance } from "@/hooks/useMerchantBalance";
 
 export default function DashboardPage() {
   const { isConnected } = useAccount();
@@ -30,6 +32,8 @@ export default function DashboardPage() {
     useState(false);
   const [paymentModalState, setPaymentModalState] = useState("create"); // create, success
   const [paymentData, setPaymentData] = useState(null);
+  const { ids, transactions, isLoading: isTransactionsLoading, refetch } = useMerchantTransactions(eoaAddress);
+  const { ethBalance, usdcBalance, isLoading: isBalanceLoading, refetch: refetchBalances } = useMerchantBalance(eoaAddress);
 
   useEffect(() => {
     setMounted(true);

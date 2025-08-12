@@ -24,9 +24,6 @@ export default function Header() {
       hash,
     });
 
-  console.log(error, isConfirming, isConfirmed, isPending)
-  console.log(isError, failureReason, receiptError)
-
   const requiredChainId = somniaTestnet.id; // Somnia
   const isCorrectNetwork = chainId === requiredChainId;
 
