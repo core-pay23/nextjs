@@ -302,7 +302,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           console.log("Payment confirmed");
           setIsProcessing(false);
           if (onSuccess) {
-            onSuccess();
+            onSuccess(payHash);
           }
         }
         break;
@@ -400,41 +400,6 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     }
   };
 
-  // Handle token approval for ERC20 tokens
-  const handleApprove = async () => {
-    if (!token || token.native) {
-      // Skip approval for native tokens
-      setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      const totalPayment = parseUnits(amount.toString(), token.decimals);
-
-      console.log("Preparing token approval with params:", {
-        tokenAddress,
-        PaymentGatewayAddress,
-        totalPayment: totalPayment.toString(),
-      });
-
-      // Call approve function on ERC20 token contract
-      const args = {
-        address: tokenAddress,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [PaymentGatewayAddress, totalPayment],
-      };
-      console.log("Approve contract args:", args);
-      approveWriteContract(args);
-    } catch (err) {
-      console.error("Approval error:", err);
-      setError(err.message || "Approval failed");
-      setIsProcessing(false);
-    }
-  };
 
   // New function to trigger approval automatically
   const triggerApproval = async () => {
