@@ -23,17 +23,18 @@ import { useMerchantTransactions } from "@/hooks/useMerchantTransactions";
 import { useMerchantBalance } from "@/hooks/useMerchantBalance";
 
 export default function DashboardPage() {
+  // All hooks must be called before any conditional returns
   const { isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
-  const [isCreatePaymentModalOpen, setIsCreatePaymentModalOpen] =
-    useState(false);
+  const [isCreatePaymentModalOpen, setIsCreatePaymentModalOpen] = useState(false);
   const [paymentModalState, setPaymentModalState] = useState("create"); // create, success
   const [paymentData, setPaymentData] = useState(null);
   const { ids, transactions, isLoading: isTransactionsLoading, refetch } = useMerchantTransactions(eoaAddress);
-  const { ethBalance, usdcBalance, isLoading: isBalanceLoading, refetch: refetchBalances } = useMerchantBalance(eoaAddress);
+  const [storageUsed, setStorageUsed] = useState(null);
+  const [storageLoading, setStorageLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -44,6 +45,15 @@ export default function DashboardPage() {
       router.push("/");
     }
   }, [isConnected, router]);
+
+  useEffect(() => {
+    // Simulate async fetch for storage used
+    setStorageLoading(true);
+    setTimeout(() => {
+      setStorageUsed("84GB"); // Replace with real value
+      setStorageLoading(false);
+    }, 1000);
+  }, []);
 
   // Don't render until client-side mounted to prevent hydration issues
   if (!mounted) {
@@ -59,9 +69,7 @@ export default function DashboardPage() {
     console.log(paymentData);
     try {
       // Create message to sign
-      const message = `Create payment request: ${paymentData.amount} ${
-        paymentData.tokenAddress
-      } to ${clientWalletAddress} at ${Date.now()}`;
+      const message = `Create payment request: ${paymentData.amount} ${paymentData.tokenAddress} to ${clientWalletAddress} at ${Date.now()}`;
 
       // Sign the message
       const signedMessage = await signMessageAsync({ message });
@@ -118,13 +126,14 @@ export default function DashboardPage() {
           clientWalletAddress={clientWalletAddress}
         />
 
+        {/* Single StatCard showing both ETH and USDC balances */}
         <StatCard
-          title="Storage Used"
-          value="84GB"
+          title="ETH & USDC Balance"
           icon={HardDriveIcon}
           iconBgColor="bg-cyan-600/20"
           iconColor="text-cyan-400"
         />
+
         {/* Shortcut Buttons */}
         <div className="col-span-2 grid grid-cols-2 gap-4">
           <button
@@ -197,34 +206,6 @@ export default function DashboardPage() {
         </ChartCard>
       </div>
 
-      {/* Studio Usage & Artists table */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Studio Usage Chart */}
-        <ChartCard>
-          <h2 className="font-medium mb-4">Studio Usage (7 days)</h2>
-          <div className="h-48 bg-slate-800/30 rounded-lg flex items-center justify-center">
-            <p className="text-white/40">Chart component placeholder</p>
-          </div>
-        </ChartCard>
-
-        {/* Artists table */}
-        <div className="lg:col-span-2">
-          <ArtistsTable />
-        </div>
-      </div>
-
-      {/* Frequency Spectrum */}
-      <ChartCard>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-medium">Frequency Spectrum Analysis</h2>
-          <button className="text-xs text-white/60 hover:text-white transition">
-            View Details
-          </button>
-        </div>
-        <div className="h-64 bg-slate-800/30 rounded-lg flex items-center justify-center">
-          <p className="text-white/40">Chart component placeholder</p>
-        </div>
-      </ChartCard>
     </section>
   );
 }

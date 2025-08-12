@@ -1,0 +1,14 @@
+{
+	"servers": {
+		"taskmanager": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@kazuph/mcp-taskmanager@1.0.2"
+			],
+			"env": {},
+			"cwd": "${workspaceFolder}"
+		}
+	},
+	"inputs": []
+}
