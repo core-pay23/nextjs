@@ -1,6 +1,6 @@
-export const mockUSDCAddress = "0xF1FCFF97118ea87Ba99CB5A590d0823651FFFDF1";
+export const mockCoreBtcAddress = '0xBB9975BC4d4C312Da92950371276BC53936182D8';
 
-export const mockUSDCAbi = [
+export const mockCoreBtcAbi = [
   {
     type: "constructor",
     inputs: [
