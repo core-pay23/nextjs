@@ -3,6 +3,7 @@ import { mockUSDCAbi, mockUSDCAddress } from "@/lib/contracts/mockUSDC";
 import { mockCoreBtcAddress } from "@/lib/contracts/btc";
 
 export function useMerchantBalance(shopOwner) {
+  console.log("useMerchantBalance called with shopOwner:", shopOwner);
   // btc balance (native)
   const t2core = useBalance({
     address: shopOwner,

@@ -6,21 +6,15 @@ import { useEOAAddress } from "@/hooks";
 import StatCard from "@/components/dashboard/StatCard";
 import DebitCard from "@/components/dashboard/DebitCard";
 import ChartCard from "@/components/dashboard/ChartCard";
-import ArtistsTable from "@/components/dashboard/ArtistsTable";
 import CreatePaymentModal from "./_components/createPaymentModal";
 import {
-  MusicIcon,
-  HardDriveIcon,
   ActivityIcon,
-  DollarSignIcon,
   WalletIcon,
   HistoryIcon,
-  BillIcon,
   MoneyBillIcon,
 } from "@/components/dashboard/Icons";
 import { ChevronDown } from "react-feather";
 import { useMerchantTransactions } from "@/hooks/useMerchantTransactions";
-import { useMerchantBalance } from "@/hooks/useMerchantBalance";
 
 export default function DashboardPage() {
   // All hooks must be called before any conditional returns
