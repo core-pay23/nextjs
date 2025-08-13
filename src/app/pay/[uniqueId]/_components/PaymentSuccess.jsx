@@ -140,14 +140,14 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
       <div className="text-center text-white/60 text-sm">
         <div className="flex items-center justify-center space-x-1">
             <Image
-              src="/icon.svg"
-              alt="Koneksi Logo"
+              src="/icon.png"
+              alt="CorePay Logo"
               width={120}
               height={120}
               className="h-6 w-6"
               priority
             />
-          <span>Transaction Secured by Koneksi</span>
+          <span>Transaction Secured by CorePay</span>
         </div>
       </div>
     </div>

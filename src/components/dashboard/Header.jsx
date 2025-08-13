@@ -18,12 +18,22 @@ export default function Header() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
 
-  const { data: hash, error, isPending, writeContract, isError, failureReason } = useWriteContract();
+  const {
+    data: hash,
+    error,
+    isPending,
+    writeContract,
+    isError,
+    failureReason,
+  } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const requiredChainId = coreTestnet.id; // Somnia
   const isCorrectNetwork = chainId === requiredChainId;
@@ -49,10 +59,13 @@ export default function Header() {
       const timeout = setTimeout(() => {
         if (isConfirming && !isConfirmed && !receiptError) {
           toast.dismiss("confirming");
-          toast.warning("Transaction is taking longer than expected. Please check your wallet or block explorer.", {
-            position: "bottom-right",
-            autoClose: 10000,
-          });
+          toast.warning(
+            "Transaction is taking longer than expected. Please check your wallet or block explorer.",
+            {
+              position: "bottom-right",
+              autoClose: 10000,
+            }
+          );
         }
       }, 60000); // 60 seconds timeout
 
@@ -92,7 +105,9 @@ export default function Header() {
     if (receiptError) {
       toast.dismiss("confirming");
       toast.error(
-        `Transaction reverted: ${receiptError.shortMessage || receiptError.message}`,
+        `Transaction reverted: ${
+          receiptError.shortMessage || receiptError.message
+        }`,
         {
           position: "bottom-right",
           autoClose: 8000,
@@ -184,14 +199,14 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <div className="lg:hidden w-8"></div>
 
-        {/* Koneksi Brand Header */}
+        {/* CorePay Brand Header */}
         <div className="flex items-center gap-3">
           {/* Network Icon - representing digital connections/blockchain */}
           <div className="relative">
             <div className="w-14 h-14 rounded-lg p-1.5 shadow-lg">
               <Image
-                src="/icon.svg"
-                alt="Koneksi Logo"
+                src="/icon.png"
+                alt="CorePay Logo"
                 width={924}
                 height={924}
                 className="w-full h-full"
@@ -202,8 +217,8 @@ export default function Header() {
         </div>
 
         <div className="">
-          <h1 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent">
-            Koneksi
+          <h1 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-[#db5827] to-[#e78137] bg-clip-text text-transparent">
+            CorePay
           </h1>
           <p className="text-xs lg:text-sm text-white/60">
             Secure digital asset processing

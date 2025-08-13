@@ -3,7 +3,7 @@ import Image from "next/image";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 
 export default function DebitCard({
-  title = "Wallet",
+  title = "EOA Wallet",
   value = "$0.27",
   logo,
   className = "",
@@ -57,13 +57,14 @@ export default function DebitCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`debit-card-animated relative rounded-2xl bg-gradient-to-br from-[#23243a] via-[#2d2e4a] to-[#1a1b2a] shadow-2xl p-6 flex flex-col justify-between min-h-[160px] overflow-hidden border border-white/10 ${className}`}
+      className={`debit-card-animated relative rounded-2xl bg-gradient-to-br from-[#23243a] via-[#2d2e4a] to-[#1a1b2a] shadow-2xl p-6 flex flex-col justify-between min-h-[160px] overflow-hidden border border-orange-500/20 ${className}`}
       style={{
         rotateX,
         rotateY,
         willChange: "transform",
         perspective: 1000,
-        boxShadow: "0 6px 32px 0 rgba(0,0,0,0.18), 0 1.5px 6px 0 rgba(0,0,0,0.10)",
+        boxShadow: "0 6px 32px 0 rgba(219, 88, 39, 0.15), 0 1.5px 6px 0 rgba(219, 88, 39, 0.08)",
+        background: "linear-gradient(135deg, #23243a 0%, #2d2e4a 30%, rgba(219, 88, 39, 0.08) 70%, #1a1b2a 100%)",
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -80,9 +81,9 @@ export default function DebitCard({
           className="absolute top-0 left-0 w-full h-full"
           style={{
             background:
-              "linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.18) 40%, rgba(0,255,255,0.12) 60%, transparent 100%)",
-            filter: "blur(8px) brightness(1.5) drop-shadow(0 0 32px #fff8)",
-            opacity: 0.7,
+              "linear-gradient(120deg, transparent 0%, rgba(255,165,40,0.25) 30%, rgba(219, 88, 39, 0.20) 60%, rgba(231, 129, 55, 0.15) 80%, transparent 100%)",
+            filter: "blur(12px) brightness(1.8) drop-shadow(0 0 40px rgba(219, 88, 39, 0.3))",
+            opacity: 0.8,
             width: "120%",
             height: "100%",
             transform: "skewX(-20deg)",
@@ -94,13 +95,13 @@ export default function DebitCard({
         {/* Icon moved to top right and made bigger */}
         <div className="absolute top-6 right-6 z-20">
           <motion.div
-            className="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-tr from-white/20 via-blue-400/20 to-pink-400/20 shadow-lg"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-tr from-white/20 via-orange-400/20 to-orange-600/20 shadow-lg"
             whileHover={{ scale: 1.15, rotate: 12 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
             <Image
-              src="/icon.svg"
-              alt="Koneksi Logo"
+              src="/icon.png"
+              alt="CorePay Logo"
               width={924}
               height={924}
               className="w-full h-full"
@@ -129,9 +130,9 @@ export default function DebitCard({
       </div>
       {/* Decorative bottom bar */}
       <motion.div
-        className="absolute left-0 bottom-0 w-full h-2 rounded-b-2xl bg-gradient-to-r from-blue-500/40 via-purple-500/40 to-pink-500/40 shadow-lg"
-        initial={{ opacity: 0.7 }}
-        whileHover={{ opacity: 1, scaleX: 1.05 }}
+        className="absolute left-0 bottom-0 w-full h-2 rounded-b-2xl bg-gradient-to-r from-orange-600/60 via-orange-500/60 to-orange-400/60 shadow-lg"
+        initial={{ opacity: 0.8 }}
+        whileHover={{ opacity: 1, scaleX: 1.05, boxShadow: "0 0 20px rgba(219, 88, 39, 0.4)" }}
         transition={{ type: "spring", stiffness: 200 }}
       />
     </motion.div>

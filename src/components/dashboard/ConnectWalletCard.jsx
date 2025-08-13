@@ -35,17 +35,17 @@ const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSig
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-24 h-24 mb-4">
-            {/* Replaced with icon.svg, now larger */}
+            {/* Replaced with icon.png, now larger */}
             <Image
-              src="/icon.svg"
-              alt="Koneksi Logo"
+              src="/icon.png"
+              alt="CorePay Logo"
               width={120}
               height={120}
               className="h-20 w-20"
               priority
             />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Koneksi</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">CorePay</h1>
           <p className="text-white/60">
             Connect your wallet to access secure digital asset payments
           </p>

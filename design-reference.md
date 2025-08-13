@@ -1,7 +1,7 @@
-# Koneksi Dashboard - Design Reference
+# CorePay Dashboard - Design Reference
 
 ## Overview
-The **Koneksi** is a secure and seamless payment processing system designed for digital assets. It features a sophisticated dark-themed interface with modern design elements and extensive use of glassmorphism effects, offering a sleek and intuitive user experience.
+The **CorePay** is a secure and seamless payment processing system designed for digital assets. It features a sophisticated dark-themed interface with modern design elements and extensive use of glassmorphism effects, offering a sleek and intuitive user experience.
 
 ## Color Palette
 
@@ -12,15 +12,15 @@ The **Koneksi** is a secure and seamless payment processing system designed for 
 - **Text**: White primary, `white/60` for secondary text
 
 ### Accent Colors
-- **Primary Blue**: `#3b82f6` (blue-500)
-- **Cyan**: `#06b6d4` (cyan-500) 
+- **Primary Orange**: `#db5827` (orange-600)
+- **Secondary Orange**: `#e78137` (orange-500) 
 - **Purple**: `#8b5cf6` (purple-500)
 - **Green**: `#10b981` (emerald-500)
 - **Amber**: `#f59e0b` (amber-500)
 - **Red**: `#ef4444` (red-500)
 
 ### Brand Colors
-- **Logo Gradient**: Blue-500 to Cyan-600
+- **Logo Gradient**: Orange-600 (#db5827) to Orange-500 (#e78137)
 - **Status Indicators**: Green (online), Yellow (recording), Gray (away)
 
 ## Typography
@@ -35,7 +35,7 @@ The **Koneksi** is a secure and seamless payment processing system designed for 
 - **Background**: `slate-900/50` with backdrop blur
 - **Border**: Right border with `white/10`
 - **Content Sections**:
-  1. **Brand Header**: Brand Header: Koneksi logo with a subtle, interconnected network icon (representing digital connections/blockchain) within a translucent, glassmorphism-style container. Koneksi wordmark in a sleek, modern font, accented by a glowing, subtle gradient underline or side-line, all set against a dark, blurred background.
+  1. **Brand Header**: Brand Header: CorePay logo with a subtle, interconnected network icon (representing digital connections/blockchain) within a translucent, glassmorphism-style container. CorePay wordmark in a sleek, modern font, accented by a glowing, subtle gradient underline or side-line, all set against a dark, blurred background.
   2. **Action Button**: "New Track" with keyboard shortcut (⌘N)
   3. **Navigation Menu**: 6 main sections with icons
   4. **Upgrade Prompt**: Premium upsell with gradient background
@@ -59,7 +59,7 @@ The **Koneksi** is a secure and seamless payment processing system designed for 
 ### Interactive Elements
 
 #### Buttons
-- **Primary**: Blue gradient background with hover states
+- **Primary**: Orange gradient background with hover states
 - **Secondary**: Transparent with white/10 background, hover transitions
 - **Icon Buttons**: Subtle hover effects with color transitions
 
@@ -80,20 +80,20 @@ The **Koneksi** is a secure and seamless payment processing system designed for 
 ### 2. Charts Section
 #### Monthly Revenue Trends (2/3 width)
 - **Type**: Line chart with filled area
-- **Colors**: Cyan primary line, purple dashed target line
+- **Colors**: Orange primary line, purple dashed target line
 - **Features**: Year selector dropdown, percentage change indicator
 - **Data**: 12 months of revenue data with target comparison
 
 #### Genre Distribution (1/3 width)
 - **Type**: Doughnut chart
 - **Data**: Hip-Hop (30%), Electronic (25%), Pop (20%), Jazz (15%), Rock (10%)
-- **Colors**: Blue spectrum with distinct colors for each genre
+- **Colors**: Orange spectrum with distinct colors for each genre
 
 ### 3. Studio Analytics Row
 #### Studio Usage (1/3 width)
 - **Type**: Bar chart
 - **Data**: 7-day usage pattern
-- **Color**: Blue bars with rounded corners
+- **Color**: Orange bars with rounded corners
 
 #### Artists Table (2/3 width)
 - **Columns**: Artist (with avatar), Genre, Status, Location, Actions
