@@ -1,6 +1,6 @@
 # Providers and Hooks Documentation
 
-This document describes the providers and hooks architecture for the Somnia Payment Gateway dashboard, built with TanStack Query and RainbowKit.
+This document describes the providers and hooks architecture for the core Payment Gateway dashboard, built with TanStack Query and RainbowKit.
 
 ## Architecture Overview
 

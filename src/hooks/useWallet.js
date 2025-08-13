@@ -145,7 +145,7 @@ export const useNetwork = () => {
   const { switchChain, isLoading: isSwitching, error } = useSwitchChain();
   
   const supportedChains = {
-    [coreTestnet.id]: 'Somnia Testnet',
+    [coreTestnet.id]: 'core Testnet',
   };
 
   const currentNetwork = supportedChains[chainId] || 'Unknown Network';

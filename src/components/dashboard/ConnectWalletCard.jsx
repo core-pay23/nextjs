@@ -222,7 +222,7 @@ const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSig
 
         {/* Network Info */}
         <div className="text-center mt-6">
-          <p className="text-white/60 text-sm">Powered by Somnia Network</p>
+          <p className="text-white/60 text-sm">Powered by core Network</p>
         </div>
       </div>
     </div>

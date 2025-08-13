@@ -340,7 +340,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     }
 
     if (!isCorrectNetwork) {
-      setError("Please switch to Somnia network");
+      setError("Please switch to core network");
       return;
     }
 
@@ -501,13 +501,13 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
                 Wrong Network
               </div>
               <div className="text-amber-200/80 text-sm mt-1">
-                Please switch to Somnia network to continue.
+                Please switch to core network to continue.
               </div>
               <button
                 onClick={handleSwitchNetwork}
                 className="mt-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-lg text-sm transition-colors"
               >
-                Switch to Somnia
+                Switch to core
               </button>
             </div>
           </div>
@@ -554,7 +554,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
                 </div>
                 <div className="text-white/60 text-xs">
                   {chainId === coreTestnet.id
-                    ? "Somnia Testnet"
+                    ? "core Testnet"
                     : `Chain ID: ${chainId}`}
                 </div>
               </div>

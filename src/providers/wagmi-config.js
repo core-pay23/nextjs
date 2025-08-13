@@ -3,11 +3,11 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { defineChain } from "viem";
 
-// Define Somnia Testnet chain
+// Define core Testnet chain
 export const coreTestnet = defineChain({
   id: 1114,
-  name: "Somnia Testnet",
-  network: "somnia-testnet",
+  name: "core Testnet",
+  network: "core-testnet",
   nativeCurrency: {
     decimals: 18,
     name: "tCORE2",

@@ -35,7 +35,7 @@ export default function Header() {
     hash,
   });
 
-  const requiredChainId = coreTestnet.id; // Somnia
+  const requiredChainId = coreTestnet.id; // core
   const isCorrectNetwork = chainId === requiredChainId;
 
   // Handle transaction status updates with toast notifications
@@ -133,7 +133,7 @@ export default function Header() {
     }
 
     if (!isCorrectNetwork) {
-      toast.error("Please switch to Somnia network", {
+      toast.error("Please switch to core network", {
         position: "bottom-right",
         autoClose: 3000,
       });
@@ -169,7 +169,7 @@ export default function Header() {
     }
 
     if (!isCorrectNetwork) {
-      toast.error("Please switch to Somnia network", {
+      toast.error("Please switch to core network", {
         position: "bottom-right",
         autoClose: 3000,
       });

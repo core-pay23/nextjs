@@ -111,7 +111,7 @@ const PaymentReview = ({ paymentData, onNext }) => {
             <div>
               <div className="text-amber-400 font-medium text-sm">Network Switch Required</div>
               <div className="text-amber-200/80 text-sm mt-1">
-                Please switch to Somnia network to complete the payment.
+                Please switch to core network to complete the payment.
               </div>
             </div>
           </div>

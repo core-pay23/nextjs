@@ -1,5 +1,5 @@
 {
-  "name": "Somnia-payment-gateway",
+  "name": "core-payment-gateway",
   "version": "0.1.0",
   "private": true,
   "scripts": {
