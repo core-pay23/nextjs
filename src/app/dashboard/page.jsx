@@ -103,7 +103,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <section className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+  <section className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 max-w-7xl mx-auto">
       <CreatePaymentModal
         isOpen={isCreatePaymentModalOpen}
         onClose={() => setIsCreatePaymentModalOpen(false)}
@@ -144,7 +144,7 @@ export default function DashboardPage() {
             <span className="text-white font-medium">Create Payment</span>
           </button>
           <a
-            href="/wallet"
+            href="/dashboard/wallet"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-emerald-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <span className="mb-2 text-emerald-400 group-hover:text-emerald-500">
@@ -153,7 +153,7 @@ export default function DashboardPage() {
             <span className="text-white font-medium">Withdraw</span>
           </a>
           <a
-            href="/wallet?action=history"
+            href="/dashboard/wallet?action=history"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-purple-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <span className="mb-2 text-purple-400 group-hover:text-purple-500">
@@ -162,7 +162,7 @@ export default function DashboardPage() {
             <span className="text-white font-medium">History</span>
           </a>
           <a
-            href="/wallet"
+            href="/dashboard/wallet"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-cyan-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
             <span className="mb-2 text-cyan-400 group-hover:text-cyan-500">
