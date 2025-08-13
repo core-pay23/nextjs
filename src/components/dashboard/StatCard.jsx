@@ -5,12 +5,14 @@ import { getTokenByName } from "@/lib/tokenlist";
 
 const tCore2 = getTokenByName("tCore2");
 const usdc = getTokenByName("Mock USDC");
+const btc = getTokenByName("mockCoreBtc");
 
 export default function StatCard({ isLoading = false }) {
   const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
   const {
     btcBalance,
     usdcBalance,
+    t2coreBalance,
     isLoading: isBalanceLoading,
     refetch: refetchBalances,
   } = useMerchantBalance(eoaAddress);
@@ -54,9 +56,10 @@ export default function StatCard({ isLoading = false }) {
 
       {loadingBalance ? (
         <div className="space-y-2">
+          {/* BTC skeleton */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="h-4 w-4 bg-white/10 rounded-full animate-pulse"></div>
               <div className="h-4 w-10 bg-white/10 rounded animate-pulse"></div>
             </div>
             <div className="h-6 w-16 bg-white/10 rounded animate-pulse"></div>
@@ -64,7 +67,15 @@ export default function StatCard({ isLoading = false }) {
           {/* USDC skeleton */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="h-4 w-4 bg-white/10 rounded-full animate-pulse"></div>
+              <div className="h-4 w-12 bg-white/10 rounded animate-pulse"></div>
+            </div>
+            <div className="h-6 w-20 bg-white/10 rounded animate-pulse"></div>
+          </div>
+          {/* tCore2 skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="h-4 w-4 bg-white/10 rounded-full animate-pulse"></div>
               <div className="h-4 w-12 bg-white/10 rounded animate-pulse"></div>
             </div>
             <div className="h-6 w-20 bg-white/10 rounded animate-pulse"></div>
@@ -74,8 +85,17 @@ export default function StatCard({ isLoading = false }) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
-              <span className="text-xs text-white/70">CoreBTC</span>
+              <img src={tCore2.logoURI} alt={tCore2.name} className="h-4 w-4 rounded-full" />
+              <span className="text-xs text-white/70">{tCore2.symbol}</span>
+            </div>
+            <span className="text-lg font-semibold text-white">
+              {t2coreBalance ?? "0.00"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <img src={btc.logoURI} alt={btc.name} className="h-4 w-4 rounded-full" />
+              <span className="text-xs text-white/70">{btc.symbol}</span>
             </div>
             <span className="text-lg font-semibold text-white">
               {btcBalance ?? "0.00"}
@@ -83,8 +103,8 @@ export default function StatCard({ isLoading = false }) {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 bg-green-400 rounded-full"></div>
-              <span className="text-xs text-white/70">USDC</span>
+              <img src={usdc.logoURI} alt={usdc.name} className="h-4 w-4 rounded-full" />
+              <span className="text-xs text-white/70">{usdc.symbol}</span>
             </div>
             <span className="text-lg font-semibold text-white">
               ${usdcBalance ?? "0.00"}
