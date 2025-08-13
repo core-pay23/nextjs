@@ -1,11 +1,8 @@
 "use client";
+import { useMemo } from "react";
 import { useEOAAddress } from "@/hooks";
 import { useMerchantBalance } from "@/hooks/useMerchantBalance";
 import { getTokenByName } from "@/lib/tokenlist";
-
-const tCore2 = getTokenByName("tCore2");
-const usdc = getTokenByName("Mock USDC");
-const btc = getTokenByName("mockCoreBtc");
 
 export default function StatCard({ isLoading = false }) {
   const { eoaAddress, loading, error, clientWalletAddress } = useEOAAddress();
@@ -17,10 +14,15 @@ export default function StatCard({ isLoading = false }) {
     refetch: refetchBalances,
   } = useMerchantBalance(eoaAddress);
 
+  // Memoize token data to prevent unnecessary re-renders
+  const { tCore2, usdc, btc } = useMemo(() => ({
+    tCore2: getTokenByName("tCore2"),
+    usdc: getTokenByName("Mock USDC"),
+    btc: getTokenByName("mockCoreBtc"),
+  }), []);
+
   // If EOA address is not available, we're still loading
   const loadingBalance = isLoading || isBalanceLoading || !eoaAddress || loading;
-
-  console.log(eoaAddress);
 
   return (
     <div className="bg-slate-900/40 backdrop-blur-lg border border-white/10 rounded-xl p-5 hover:bg-slate-900/50 transition-all duration-300">

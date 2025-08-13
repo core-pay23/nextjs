@@ -1,22 +1,28 @@
 import { useBalance, useReadContract } from "wagmi";
 import { mockUSDCAbi, mockUSDCAddress } from "@/lib/contracts/mockUSDC";
-import { mockCoreBtcAddress } from "@/lib/contracts/btc";
+import { mockCoreBtcAddress, mockCoreBtcAbi } from "@/lib/contracts/btc";
 
 export function useMerchantBalance(shopOwner) {
-  console.log("useMerchantBalance called with shopOwner:", shopOwner);
-  // btc balance (native)
+  // t2core balance (native token)
   const t2core = useBalance({
     address: shopOwner,
     watch: true,
+    query: { 
+      enabled: !!shopOwner,
+      staleTime: 30 * 1000, // 30 seconds
+    },
   });
 
-  // USDC balance (mock address — replace with real token)
+  // BTC balance (mock address — replace with real token)
   const btc = useReadContract({
     address: mockCoreBtcAddress,
-    abi: mockUSDCAbi,
+    abi: mockCoreBtcAbi,
     functionName: "balanceOf",
     args: [shopOwner],
-    query: { enabled: !!shopOwner },
+    query: { 
+      enabled: !!shopOwner,
+      staleTime: 30 * 1000, // 30 seconds
+    },
   });
 
   const usdc = useReadContract({
@@ -24,7 +30,10 @@ export function useMerchantBalance(shopOwner) {
     abi: mockUSDCAbi,
     functionName: "balanceOf",
     args: [shopOwner],
-    query: { enabled: !!shopOwner },
+    query: { 
+      enabled: !!shopOwner,
+      staleTime: 30 * 1000, // 30 seconds
+    },
   });
 
   const usdcFormatted =

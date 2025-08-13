@@ -15,6 +15,7 @@ import {
 } from "@/components/dashboard/Icons";
 import { ChevronDown } from "react-feather";
 import { useMerchantTransactions } from "@/hooks/useMerchantTransactions";
+import Link from "next/link";
 
 export default function DashboardPage() {
   // All hooks must be called before any conditional returns
@@ -137,7 +138,7 @@ export default function DashboardPage() {
             </span>
             <span className="text-white font-medium">Create Payment</span>
           </button>
-          <a
+          <Link
             href="/dashboard/wallet"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-emerald-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
@@ -145,8 +146,8 @@ export default function DashboardPage() {
               <ActivityIcon className="h-6 w-6" />
             </span>
             <span className="text-white font-medium">Withdraw</span>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/dashboard/wallet?action=history"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-purple-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
@@ -154,8 +155,8 @@ export default function DashboardPage() {
               <HistoryIcon className="h-6 w-6" />
             </span>
             <span className="text-white font-medium">History</span>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/dashboard/wallet"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-cyan-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
@@ -163,7 +164,7 @@ export default function DashboardPage() {
               <WalletIcon className="h-6 w-6" />
             </span>
             <span className="text-white font-medium">Wallet</span>
-          </a>
+          </Link>
         </div>
       </div>
 
