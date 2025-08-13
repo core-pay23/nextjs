@@ -11,7 +11,7 @@ import {
 import { parseUnits } from "viem";
 import { toast } from "react-toastify";
 import { mockUSDCAddress, mockUSDCAbi } from "@/lib/contracts/mockUSDC";
-import { somniaTestnet } from "@/providers/wagmi-config";
+import { coreTestnet } from "@/providers/wagmi-config";
 
 export default function Header() {
   const { address, isConnected } = useAccount();
@@ -24,7 +24,7 @@ export default function Header() {
       hash,
     });
 
-  const requiredChainId = somniaTestnet.id; // Somnia
+  const requiredChainId = coreTestnet.id; // Somnia
   const isCorrectNetwork = chainId === requiredChainId;
 
   // Handle transaction status updates with toast notifications

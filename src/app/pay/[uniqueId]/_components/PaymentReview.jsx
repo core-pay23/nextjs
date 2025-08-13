@@ -1,5 +1,5 @@
 "use client";
-import { somniaTestnet } from "@/providers/wagmi-config";
+import { coreTestnet } from "@/providers/wagmi-config";
 import TokenDisplay from "./TokenDisplay";
 import { useWallet } from "@/hooks/useWallet";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ const PaymentReview = ({ paymentData, onNext }) => {
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
   const { isConnected, openConnectModal, chainId } = useWallet();
-  const requiredChainId = somniaTestnet.id;
+  const requiredChainId = coreTestnet.id;
   const isCorrectNetwork = chainId === requiredChainId;
   const [mounted, setMounted] = useState(false);
 

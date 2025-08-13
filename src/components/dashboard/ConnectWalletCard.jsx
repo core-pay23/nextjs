@@ -10,17 +10,6 @@ const ConnectWalletCard = ({ isConnected, handleSignMessage, isSigning, checkSig
     setMounted(true);
   }, []);
 
-  // Auto-trigger signing when wallet connects (only once)
-  useEffect(() => {
-    if (mounted && isConnected && !isSigning) {
-      // Small delay to ensure wallet is fully connected
-      const timer = setTimeout(() => {
-        handleSignMessage();
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isConnected, handleSignMessage, isSigning, mounted]);
 
   // Prevent hydration mismatch by not rendering until client-side mounted
   if (!mounted) {

@@ -2,7 +2,7 @@
 
 import { WagmiProvider } from "wagmi";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import somniaWagmiConfig from "./wagmi-config";
+import coreWagmiConfig from "./wagmi-config";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import '@rainbow-me/rainbowkit/styles.css';
 
@@ -10,7 +10,7 @@ const queryClient = new QueryClient();
 
 const DashboardProvider = ({ children }) => {
   return (
-    <WagmiProvider config={somniaWagmiConfig}>
+    <WagmiProvider config={coreWagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>{children}</RainbowKitProvider>
       </QueryClientProvider>

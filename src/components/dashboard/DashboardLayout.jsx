@@ -5,7 +5,6 @@ import { useAccount, useSignMessage } from "wagmi";
 import { useRouter } from "next/navigation";
 import Header from "./Header";
 import ConnectWalletCard from "./ConnectWalletCard";
-import { coreTestnet } from "@/providers/wagmi-config";
 import { useWallet } from "@/hooks";
 
 // Check if signature exists and is valid

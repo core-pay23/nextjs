@@ -8,7 +8,7 @@ import { tokenList } from "@/lib/tokenlist";
 import { parseUnits, formatUnits } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import Image from "next/image";
-import { somniaTestnet } from "@/providers/wagmi-config";
+import { coreTestnet } from "@/providers/wagmi-config";
 import {
   PaymentGatewayAbi,
   PaymentGatewayAddress,
@@ -92,8 +92,8 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   } = useWallet();
   const { amount, tokenAddress, User } = paymentData;
   const recipientAddress = User?.EoaAddress;
-  const requiredChainId = somniaTestnet.id;
-  const isCorrectNetwork = somniaTestnet.id === chainId;
+  const requiredChainId = coreTestnet.id;
+  const isCorrectNetwork = coreTestnet.id === chainId;
 
   // Get token info
   const token = tokenList.find(
@@ -359,7 +359,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
 
     try {
       // Prepare arguments for createTransaction
-      const originChain = somniaTestnet.id.toString();
+      const originChain = coreTestnet.id.toString();
       const totalPayment = parseUnits(amount.toString(), token.decimals);
       const shopOwner = recipientAddress;
       const paymentToken = tokenAddress;
@@ -553,7 +553,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
                     : ""}
                 </div>
                 <div className="text-white/60 text-xs">
-                  {chainId === somniaTestnet.id
+                  {chainId === coreTestnet.id
                     ? "Somnia Testnet"
                     : `Chain ID: ${chainId}`}
                 </div>

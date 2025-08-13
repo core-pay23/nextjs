@@ -3,7 +3,7 @@
 import { useState } from "react";
 import TokenDisplay from "./TokenDisplay";
 import Image from "next/image";
-import { somniaTestnet } from "@/providers/wagmi-config";
+import { coreTestnet } from "@/providers/wagmi-config";
 
 const PaymentSuccess = ({ paymentData, transactionHash }) => {
   const [copied, setCopied] = useState(false);
@@ -17,7 +17,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
     }
   };
 
-  const explorerUrl = `${somniaTestnet.blockExplorers.default.url}/tx/${transactionHash}`;
+  const explorerUrl = `${coreTestnet.blockExplorers.default.url}/tx/${transactionHash}`;
 
   return (
     <div className="space-y-6">
