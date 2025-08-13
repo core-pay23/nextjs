@@ -27,7 +27,7 @@ export default function WalletPage() {
   const { eoaAddress, loading, error } = useEOAAddress();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0c1425] py-8 px-2 sm:px-6 lg:px-12">
+    <div className="min-h-screen bg-gradient-to-br py-8 max-w-7xl px-6 mx-auto">
       {/* Wallet Card */}
       <WalletCard
         avatar={wallet.avatar}
@@ -37,8 +37,8 @@ export default function WalletPage() {
         error={error}
       />
 
-  {/* Token Table */}
-      <div className="max-w-4xl mx-auto bg-slate-900/40 backdrop-blur rounded-2xl border border-white/10 shadow-lg p-6">
+      {/* Token Table */}
+      <div className="mx-auto bg-slate-900/40 backdrop-blur rounded-2xl border border-white/10 shadow-lg p-6">
         <div className="flex gap-4 mb-4">
           <button className="px-4 py-1.5 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition">
             Tokens

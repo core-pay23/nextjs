@@ -168,7 +168,9 @@ export default function DashboardLayout({ children }) {
 
       // Call signMessage and await the result
       const signature = await signMessage({ message });
+      saveSignature(signature);
     } catch (error) {
+      console.error("Error signing message:", error);
     } finally {
       setIsSigning(false);
     }
