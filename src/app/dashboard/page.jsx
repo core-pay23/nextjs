@@ -128,8 +128,6 @@ export default function DashboardPage() {
 
         {/* Single StatCard showing both ETH and USDC balances */}
         <StatCard
-          title="ETH & USDC Balance"
-          icon={HardDriveIcon}
           iconBgColor="bg-cyan-600/20"
           iconColor="text-cyan-400"
         />

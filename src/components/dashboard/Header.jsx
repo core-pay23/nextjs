@@ -12,6 +12,7 @@ import { parseUnits } from "viem";
 import { toast } from "react-toastify";
 import { mockUSDCAddress, mockUSDCAbi } from "@/lib/contracts/mockUSDC";
 import { coreTestnet } from "@/providers/wagmi-config";
+import { mockCoreBtcAbi, mockCoreBtcAddress } from "@/lib/contracts/btc";
 
 export default function Header() {
   const { address, isConnected } = useAccount();
@@ -143,6 +144,41 @@ export default function Header() {
     }
   };
 
+  const handleMintMockBtc = () => {
+    if (!isConnected) {
+      toast.error("Please connect your wallet first", {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    if (!isCorrectNetwork) {
+      toast.error("Please switch to Somnia network", {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    try {
+      // Use the mint function to mint 0.001 Mock Core Btc to the connected wallet
+      writeContract({
+        address: mockCoreBtcAddress,
+        abi: mockUSDCAbi,
+        functionName: "mint",
+        args: [address, parseUnits("0.001", 8)], // mint 0.001 Mock Core Btc to current wallet address
+      });
+      console.log(parseUnits("0.001", 8));
+    } catch (err) {
+      console.error("Error minting CoreBtc:", err);
+      toast.error(`Failed to mint CoreBtc: ${err.message || "Unknown error"}`, {
+        position: "bottom-right",
+        autoClose: 5000,
+      });
+    }
+  };
+
   return (
     <header className="flex items-center justify-between gap-4 px-4 lg:px-6 py-4 border-b border-white/10 bg-slate-900/30 backdrop-blur-lg">
       <div className="flex items-center gap-4">
@@ -182,6 +218,13 @@ export default function Header() {
           className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
         >
           {isPending ? "Minting..." : "Mint USDC"}
+        </button>
+        <button
+          onClick={handleMintMockBtc}
+          disabled={isPending || !isConnected || !isCorrectNetwork}
+          className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+        >
+          {isPending ? "Minting..." : "Mint Mock Core Btc"}
         </button>
         <ConnectButton />
       </div>

@@ -1,3 +1,5 @@
+'use client';
+
 import { erc20Abi } from "viem";
 import { mockUSDCAddress } from "./contracts/mockUSDC";
 import { mockCoreBtcAbi, mockCoreBtcAddress } from "./contracts/btc";
@@ -10,6 +12,7 @@ export const tokenList = [
         decimals: 18,
         abi: mockCoreBtcAbi,
         native: true,
+        logoURI: "/icons/btc.png",
     },
     {
         name: "tCore2",
@@ -17,6 +20,7 @@ export const tokenList = [
         address: "0x0000000000000000000000000000000000000000",
         decimals: 18,
         abi: erc20Abi,
+        logoURI: "/icons/core.png",
         native: true,
     },
     {
@@ -24,8 +28,12 @@ export const tokenList = [
         symbol: "MOCK USDC",
         address: mockUSDCAddress,
         decimals: 6,
-        logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+        logoURI: "/icons/usdc.png",
         abi: erc20Abi,
         native: false,
     },
 ];
+
+export const getTokenByName = (name) => {
+    return tokenList.find((token) => token.name === name);
+};

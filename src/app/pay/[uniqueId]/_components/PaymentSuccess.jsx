@@ -17,7 +17,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
     }
   };
 
-  const explorerUrl = `${coreTestnet.blockExplorers.default.url}/tx/${transactionHash}`;
+  const explorerUrl = `${coreTestnet.blockExplorers.default.url}tx/${transactionHash}`;
 
   return (
     <div className="space-y-6">
