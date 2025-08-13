@@ -20,6 +20,7 @@ export default function CreatePaymentModal({
   const [token, setToken] = useState("");
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const qrCodeRef = useRef(null);
 
   const handleSubmit = async (e) => {
@@ -87,7 +88,7 @@ export default function CreatePaymentModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Create New Payment"
+      title="New Payment"
       size="md"
     >
       {paymentModalState === "create" && (
@@ -172,14 +173,14 @@ export default function CreatePaymentModal({
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200 font-medium"
+              className="flex-1 px-4 py-3 bg-slate-800/40 backdrop-blur-sm border border-white/10 hover:bg-slate-700/40 hover:border-white/20 text-white font-medium rounded-xl transition-all duration-300 ease-in-out"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !token || !amount}
-              className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium"
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:from-orange-800 disabled:to-orange-800 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-300 ease-in-out"
             >
               {isLoading ? "Creating..." : "Create Payment"}
             </button>
@@ -197,7 +198,8 @@ export default function CreatePaymentModal({
           const handleCopy = async () => {
             try {
               await navigator.clipboard.writeText(url);
-              // Optional: Add toast notification here
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
             } catch (err) {
               console.error('Failed to copy: ', err);
             }
@@ -206,40 +208,53 @@ export default function CreatePaymentModal({
           return (
             <div className="flex flex-col items-center justify-center text-center space-y-6">
               {/* Success Header */}
-              <div className="flex flex-col items-center space-y-3">
-                <div className="w-16 h-16 bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="text-center">
+                <div className="w-14 h-14 mx-auto bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4">
+                  <svg 
+                    className="w-10 h-10 text-white animate-pulse" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path 
+                      fillRule="evenodd" 
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
+                      clipRule="evenodd" 
+                    />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-white">
-                  Payment Link Created
-                </h3>
-                <p className="text-white/60 text-sm">
+                <h1 className="text-xl font-semibold text-white mb-2">
+                  Payment Link Created!
+                </h1>
+                <p className="text-sm text-white/60">
                   Share this link with your customer to receive payment
                 </p>
               </div>
 
-              {/* Payment Details Card */}
-              <div className="w-full bg-slate-900/40 backdrop-blur-lg border border-white/10 rounded-xl p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    {/* Token Logo */}
-                    {tokenInfo?.logoURI && (
-                      <img 
-                        src={tokenInfo.logoURI} 
-                        alt={tokenInfo.symbol} 
-                        className="w-10 h-10 rounded-full bg-slate-800 border border-white/10"
-                      />
-                    )}
-                    <div className="text-left">
-                      <p className="text-white font-medium">{tokenInfo?.name || 'Unknown Token'}</p>
-                      <p className="text-white/60 text-sm">{tokenInfo?.symbol || 'N/A'}</p>
+              {/* Payment Details */}
+              <div className="border border-white/10 rounded-xl p-6 space-y-4 w-full">
+                <h2 className="text-base font-medium text-white">Payment Details</h2>
+                
+                {/* Amount */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-slate-700/40 p-4 rounded-lg border border-white/5">
+                    <div className="flex items-center space-x-3">
+                      {/* Token Logo */}
+                      {tokenInfo?.logoURI && (
+                        <img 
+                          src={tokenInfo.logoURI} 
+                          alt={tokenInfo.symbol} 
+                          className="w-10 h-10 rounded-full bg-slate-800 border border-white/10"
+                        />
+                      )}
+                      <div className="text-left">
+                        <p className="text-white font-medium">{tokenInfo?.name || 'Unknown Token'}</p>
+                        <p className="text-white/60 text-sm">{tokenInfo?.symbol || 'N/A'}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-white">{paymentData.payment.amount}</p>
-                    <p className="text-white/60 text-sm">{tokenInfo?.symbol || ''}</p>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-white">{paymentData.payment.amount}</p>
+                      <p className="text-white/60 text-sm">{tokenInfo?.symbol || ''}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -248,7 +263,7 @@ export default function CreatePaymentModal({
               <div className="bg-white p-4 rounded-xl shadow-lg">
                 <div ref={qrCodeRef} className="flex items-center justify-center"></div>
               </div>
-
+              
               {/* Payment URL with copy button */}
               <div className="w-full space-y-2">
                 <label className="block text-sm font-medium text-white/80">Payment URL</label>
@@ -262,15 +277,18 @@ export default function CreatePaymentModal({
                   />
                   <button
                     onClick={handleCopy}
-                    type="button"
-                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 flex items-center space-x-2 font-medium"
-                    title="Copy URL"
+                    className="text-white/60 hover:text-white transition-colors shrink-0 px-4 py-3"
+                    title="Copy transaction hash"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <rect x="9" y="9" width="13" height="13" rx="2" />
-                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                    </svg>
-                    <span className="hidden sm:inline">Copy</span>
+                    {copied ? (
+                      <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>
@@ -279,13 +297,13 @@ export default function CreatePaymentModal({
               <div className="flex gap-3 w-full pt-2">
                 <button
                   onClick={handleClose}
-                  className="flex-1 px-4 py-3 bg-slate-900/40 backdrop-blur-sm border border-white/10 hover:bg-white/10 text-white rounded-lg transition-all duration-200 font-medium"
+                  className="flex-1 px-4 py-3 bg-slate-800/40 backdrop-blur-sm border border-white/10 hover:bg-slate-700/40 hover:border-white/20 text-white font-medium rounded-xl transition-all duration-300 ease-in-out"
                 >
                   Close
                 </button>
                 <button
                   onClick={() => setPaymentModalState("create")}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-lg font-medium transition-all duration-200"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-xl font-medium transition-all duration-300 ease-in-out"
                 >
                   Create Another
                 </button>
