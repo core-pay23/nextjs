@@ -130,9 +130,12 @@ export default function DashboardLayout({ children }) {
             localStorage.removeItem("walletAddress");
             localStorage.removeItem("signatureTimestamp");
           }
+          setHasValidSignature(false);
+        } else {
+          setHasValidSignature(true);
         }
-
-        setHasValidSignature(true);
+      } else {
+        setHasValidSignature(false);
       }
     };
 
@@ -142,14 +145,21 @@ export default function DashboardLayout({ children }) {
 
   // Log the state of the useSignMessage hook for debugging
   useEffect(() => {
-    if (data && !isLoading && address) {
-      localStorage.setItem("walletSignature", signature);
-      localStorage.setItem("walletAddress", address);
-      localStorage.setItem("signatureTimestamp", Date.now().toString());
-      setIsSigning(false);
-      console.log(checkSignature())
-    }
-  }, [data, error, isLoading, hasValidSignature]);
+    const saveSignatureData = async () => {
+      if (data && !isLoading && address) {
+        const saveResult = await saveSignature(data, address);
+        setIsSigning(false);
+        if (saveResult) {
+          setHasValidSignature(true);
+        } else {
+          setHasValidSignature(false);
+        }
+        console.log("Signature save result:", saveResult);
+      }
+    };
+
+    saveSignatureData();
+  }, [data, error, isLoading, address]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -168,7 +178,7 @@ export default function DashboardLayout({ children }) {
 
       // Call signMessage and await the result
       const signature = await signMessage({ message });
-      saveSignature(signature);
+      saveSignature(signature, address);
     } catch (error) {
       console.error("Error signing message:", error);
     } finally {
