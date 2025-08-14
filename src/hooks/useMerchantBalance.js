@@ -39,11 +39,19 @@ export function useMerchantBalance(shopOwner) {
   const usdcFormatted =
     usdc.data !== undefined ? (Number(usdc.data) / 1e6).toFixed(2) : undefined; // assuming 6 decimals for USDC
 
+  // Format balances for display
+  const formatBalance = (balance) => {
+    if (balance === undefined) return undefined;
+    return parseFloat(balance).toFixed(6);
+  };
+
   return {
-    t2coreBalance: t2core.data?.formatted,
-    btcBalance: btc.data?.formatted,
+    t2coreBalance: formatBalance(t2core.data?.formatted),
+    btcBalance: formatBalance(btc.data?.formatted),
     usdcBalance: usdcFormatted,
     isLoading: t2core.isLoading || btc.isLoading || usdc.isLoading,
+    isError: t2core.isError || btc.isError || usdc.isError,
+    error: t2core.error || btc.error || usdc.error,
     refetch: () => {
       t2core.refetch();
       btc.refetch();
