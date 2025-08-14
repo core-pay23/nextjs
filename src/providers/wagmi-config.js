@@ -3,8 +3,8 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { defineChain } from "viem";
 
-// Define core Testnet chain
-export const coreTestnet = defineChain({
+
+export const coreTestnetConfig = {
   id: 1114,
   name: "core Testnet",
   network: "core-testnet",
@@ -28,7 +28,12 @@ export const coreTestnet = defineChain({
     },
   },
   testnet: true,
-});
+}
+
+// Define core Testnet chain
+export const coreTestnet = defineChain(
+  coreTestnetConfig
+);
 
 export const coreWagmiConfig = getDefaultConfig({
   appName: "My RainbowKit App",

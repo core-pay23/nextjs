@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { privateKeyToAccount } from "viem/accounts";
 
 const ALGORITHM = "aes-256-gcm";
 const KEY_LENGTH = 32;
@@ -91,13 +92,9 @@ export function decryptPrivateKey(encryptedPrivateKey, password, salt) {
 export function generateWallet() {
   // Generate a random 32-byte private key
   const privateKey = crypto.randomBytes(32).toString("hex");
-
-  // Derive address from private key (simplified for demo - in real app use proper derivation)
-  const hash = crypto.createHash("sha256").update(privateKey).digest("hex");
-  const address = "0x" + hash.slice(-40);
-
+  const account =  privateKeyToAccount(`0x${privateKey}`); // Validate the private key format
   return {
-    address: address,
+    address: account.address,
     privateKey: privateKey,
   };
 }

@@ -1,24 +1,61 @@
-'use client';
+"use client";
 import { useState, useEffect, useRef } from "react";
 import Modal from "@/components/Modal";
 import { DollarSignIcon, WalletIcon } from "@/components/dashboard/Icons";
 import { tokenList } from "@/lib/tokenlist";
-import QRCode from "qrcode";
 import { useWithdrawModal } from "@/providers/WithdrawModalProvider";
+import { useEOAAddress } from "@/hooks";
+import { useMerchantBalance } from "@/hooks/useMerchantBalance";
+import { useAccount, useSignMessage } from "wagmi";
 
 const createUrl = (uniqueId) => {
   return window.location.origin + `/pay/${uniqueId}`;
 };
 
 export default function WithdrawModal({ onWithdraw }) {
+  // Helper function to get balance based on selected token
+  const getBalanceForToken = (tokenAddress) => {
+    if (!tokenAddress) return 0;
+    
+    const balance = 
+      tokenAddress === tokenList[0].address
+        ? btcBalance
+        : tokenAddress === tokenList[1].address
+        ? t2coreBalance
+        : tokenAddress === tokenList[2].address
+        ? usdcBalance
+        : 0;
+        
+    return parseFloat(balance || 0);
+  };
+
+  // Helper function to check if amount exceeds balance
+  const isAmountExceedingBalance = () => {
+    if (!token || !amount) return false;
+    const balance = getBalanceForToken(token);
+    const amountValue = parseFloat(amount);
+    return amountValue > balance;
+  };
+
+  const { isConnected, address } = useAccount();
+
   const {
     isWithdrawModalOpen: isOpen,
     closeWithdrawModal: onClose,
     withdrawModalState,
     setWithdrawModalState,
     withdrawData,
-    setWithdrawData
+    setWithdrawData,
   } = useWithdrawModal();
+  const { eoaAddress, isLoading: isEOALoading } = useEOAAddress();
+  
+  const {
+    btcBalance,
+    usdcBalance,
+    t2coreBalance,
+    isLoading: isBalanceLoading,
+    refetch: refetchBalances,
+  } = useMerchantBalance(eoaAddress);
 
   const [token, setToken] = useState("");
   const [amount, setAmount] = useState("");
@@ -26,13 +63,56 @@ export default function WithdrawModal({ onWithdraw }) {
   const [copied, setCopied] = useState(false);
   const qrCodeRef = useRef(null);
 
+  const { signMessageAsync } = useSignMessage();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!token || !amount) return;
 
+    // Validate amount against balance
+    const balance = getBalanceForToken(token);
+    const amountValue = parseFloat(amount);
+    
+    if (amountValue > balance) {
+      alert("Amount exceeds available balance");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await onWithdraw({ tokenAddress: token, amount: parseFloat(amount) });
+      // Create a message to sign
+      const message = `Withdraw ${amountValue} ${tokenList.find(t => t.address === token)?.symbol || 'tokens'} from your wallet`;
+      
+      // Sign the message
+      const signature = await signMessageAsync({ message });
+      console.log("Signature:", signature);
+      
+      // Prepare data for API call
+      const withdrawData = {
+        tokenAddress: token,
+        amount: amountValue,
+        signature,
+        clientWalletAddress: address,
+        message
+      };
+      
+      // Send data to API endpoint
+      const response = await fetch("/api/withdraw", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(withdrawData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create withdrawal");
+      }
+
+      const result = await response.json();
+      
+      // Proceed with withdrawal
+      await onWithdraw(result);
       setToken("");
       setAmount("");
       // Don't call onClose() here - let the parent handle modal state
@@ -54,36 +134,7 @@ export default function WithdrawModal({ onWithdraw }) {
     onClose();
   };
 
-  // Generate QR code when withdraw data changes
-  useEffect(() => {
-    if (withdrawModalState === "success" && withdrawData && qrCodeRef.current) {
-      // Clear previous QR code
-      qrCodeRef.current.innerHTML = '';
-      
-      const url = createUrl(withdrawData.withdrawal.uniqueId);
-      
-      QRCode.toDataURL(url, {
-        width: 180,
-        margin: 1,
-        color: {
-          dark: '#0b111d',
-          light: '#ffffff'
-        }
-      })
-      .then(dataURL => {
-        const img = document.createElement('img');
-        img.src = dataURL;
-        img.style.display = 'block';
-        img.style.margin = '0 auto';
-        qrCodeRef.current.appendChild(img);
-      })
-      .catch(error => {
-        console.error('Error generating QR code:', error);
-      });
-    }
-  }, [withdrawModalState, withdrawData]);
-
-  if(withdrawData){
+  if (withdrawData) {
     console.log("Withdraw Data:", withdrawData);
   }
 
@@ -146,6 +197,22 @@ export default function WithdrawModal({ onWithdraw }) {
             </div>
           </div>
 
+          {/* Token Balance Display */}
+          {token && (
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-white/60">Available Balance:</span>
+              <span className="text-white font-medium">
+                {token === tokenList[0].address
+                  ? `${btcBalance || "0.00"} ${tokenList[0].symbol}`
+                  : token === tokenList[1].address
+                  ? `${t2coreBalance || "0.00"} ${tokenList[1].symbol}`
+                  : token === tokenList[2].address
+                  ? `${usdcBalance || "0.00"} ${tokenList[2].symbol}`
+                  : "0.00"}
+              </span>
+            </div>
+          )}
+
           {/* Amount Input */}
           <div>
             <label
@@ -159,17 +226,74 @@ export default function WithdrawModal({ onWithdraw }) {
                 <DollarSignIcon className="h-5 w-5 text-white/40" />
               </div>
               <input
-                type="number"
+                type="text"
                 id="amount"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  // Allow only numbers and decimal separator
+                  const value = e.target.value;
+                  // Check if the input matches a valid number pattern (including decimal)
+                  if (value === '' || /^\d*\.?\d*$/.test(value.replace(',', '.'))) {
+                    // Replace comma with period for decimal separator
+                    const formattedValue = value.replace(',', '.');
+                    setAmount(formattedValue);
+                  }
+                }}
                 placeholder="0.00"
-                step="0.01"
-                className="w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className={`w-full pl-10 pr-3 py-3 bg-white/5 border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                  !token || !amount 
+                    ? "border-white/10 focus:ring-blue-500" 
+                    : isAmountExceedingBalance() 
+                      ? "border-red-500 focus:ring-red-500" 
+                      : "border-white/10 focus:ring-blue-500"
+                }`}
                 required
               />
             </div>
           </div>
+
+          {/* Error Message */}
+          {token && amount && isAmountExceedingBalance() && (
+            <div className="text-red-500 text-sm">
+              Amount exceeds available balance of {getBalanceForToken(token)}
+            </div>
+          )}
+
+          {/* Percentage Buttons */}
+          {token && (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const balance = getBalanceForToken(token);
+                  setAmount((balance * 0.25).toString());
+                }}
+                className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                25%
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const balance = getBalanceForToken(token);
+                  setAmount((balance * 0.5).toString());
+                }}
+                className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                50%
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const balance = getBalanceForToken(token);
+                  setAmount(balance.toString());
+                }}
+                className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                100%
+              </button>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
@@ -182,7 +306,7 @@ export default function WithdrawModal({ onWithdraw }) {
             </button>
             <button
               type="submit"
-              disabled={isLoading || !token || !amount}
+              disabled={isLoading || !token || !amount || isAmountExceedingBalance() || getBalanceForToken(token) <= 0}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:from-orange-800 disabled:to-orange-800 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-300 ease-in-out"
             >
               {isLoading ? "Processing..." : "Withdraw"}
@@ -191,12 +315,15 @@ export default function WithdrawModal({ onWithdraw }) {
         </form>
       )}
 
-      {withdrawModalState === "success" && withdrawData && (
+      {withdrawModalState === "success" &&
+        withdrawData &&
         (() => {
           // Find token info from tokenList
-          const tokenInfo = tokenList.find(t => t.address === withdrawData.withdrawal.tokenAddress);
+          const tokenInfo = tokenList.find(
+            (t) => t.address === withdrawData.withdrawal.tokenAddress
+          );
           const url = createUrl(withdrawData.withdrawal.uniqueId);
-          
+
           // Copy to clipboard handler
           const handleCopy = async () => {
             try {
@@ -204,7 +331,7 @@ export default function WithdrawModal({ onWithdraw }) {
               setCopied(true);
               setTimeout(() => setCopied(false), 2000);
             } catch (err) {
-              console.error('Failed to copy: ', err);
+              console.error("Failed to copy: ", err);
             }
           };
 
@@ -213,15 +340,15 @@ export default function WithdrawModal({ onWithdraw }) {
               {/* Success Header */}
               <div className="text-center">
                 <div className="w-14 h-14 mx-auto bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4">
-                  <svg 
-                    className="w-10 h-10 text-white animate-pulse" 
-                    fill="currentColor" 
+                  <svg
+                    className="w-10 h-10 text-white animate-pulse"
+                    fill="currentColor"
                     viewBox="0 0 20 20"
                   >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                      clipRule="evenodd" 
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
                     />
                   </svg>
                 </div>
@@ -235,28 +362,38 @@ export default function WithdrawModal({ onWithdraw }) {
 
               {/* Withdrawal Details */}
               <div className="border border-white/10 rounded-xl p-6 space-y-4 w-full">
-                <h2 className="text-base font-medium text-white">Withdrawal Details</h2>
-                
+                <h2 className="text-base font-medium text-white">
+                  Withdrawal Details
+                </h2>
+
                 {/* Amount */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-slate-700/40 p-4 rounded-lg border border-white/5">
                     <div className="flex items-center space-x-3">
                       {/* Token Logo */}
                       {tokenInfo?.logoURI && (
-                        <img 
-                          src={tokenInfo.logoURI} 
-                          alt={tokenInfo.symbol} 
+                        <img
+                          src={tokenInfo.logoURI}
+                          alt={tokenInfo.symbol}
                           className="w-10 h-10 rounded-full bg-slate-800 border border-white/10"
                         />
                       )}
                       <div className="text-left">
-                        <p className="text-white font-medium">{tokenInfo?.name || 'Unknown Token'}</p>
-                        <p className="text-white/60 text-sm">{tokenInfo?.symbol || 'N/A'}</p>
+                        <p className="text-white font-medium">
+                          {tokenInfo?.name || "Unknown Token"}
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          {tokenInfo?.symbol || "N/A"}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-white">{withdrawData.withdrawal.amount}</p>
-                      <p className="text-white/60 text-sm">{tokenInfo?.symbol || ''}</p>
+                      <p className="text-2xl font-bold text-white">
+                        {withdrawData.withdrawal.amount}
+                      </p>
+                      <p className="text-white/60 text-sm">
+                        {tokenInfo?.symbol || ""}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -264,12 +401,17 @@ export default function WithdrawModal({ onWithdraw }) {
 
               {/* QR Code */}
               <div className="bg-white p-4 rounded-xl shadow-lg">
-                <div ref={qrCodeRef} className="flex items-center justify-center"></div>
+                <div
+                  ref={qrCodeRef}
+                  className="flex items-center justify-center"
+                ></div>
               </div>
-              
+
               {/* Withdrawal URL with copy button */}
               <div className="w-full space-y-2">
-                <label className="block text-sm font-medium text-white/80">Withdrawal URL</label>
+                <label className="block text-sm font-medium text-white/80">
+                  Withdrawal URL
+                </label>
                 <div className="flex items-center bg-slate-900/40 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
                   <input
                     type="text"
@@ -284,12 +426,30 @@ export default function WithdrawModal({ onWithdraw }) {
                     title="Copy transaction hash"
                   >
                     {copied ? (
-                      <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <svg
+                        className="w-4 h-4 text-green-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
                       </svg>
                     )}
                   </button>
@@ -313,8 +473,7 @@ export default function WithdrawModal({ onWithdraw }) {
               </div>
             </div>
           );
-        })()
-      )}
+        })()}
     </Modal>
   );
 }

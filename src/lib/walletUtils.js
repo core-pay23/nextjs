@@ -74,6 +74,7 @@ export async function getPrivateKey(clientWalletAddress) {
     if (!user.EoaPrivateKey || !user.salt) {
       throw new Error('Private key or salt not found');
     }
+    console.log(user)
 
     const encryptionPassword = process.env.ENCRYPTION_PASSWORD || 'default-password-change-this';
     const decryptedPrivateKey = decryptPrivateKey(user.EoaPrivateKey, encryptionPassword, user.salt);
