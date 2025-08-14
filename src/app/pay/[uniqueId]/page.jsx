@@ -8,7 +8,10 @@ const PayPage = async ({ params }) => {
   let paymentData = null;
   try {
     paymentData = await prisma.payment.findUnique({
-      where: { uniqueId },
+      where: { 
+        uniqueId,
+        status: "PENDING"
+      },
       include: { User: { select: { EoaAddress: true } } },
     });
     if (!paymentData) {

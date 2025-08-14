@@ -1,13 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TokenDisplay from "./TokenDisplay";
 import Image from "next/image";
 import { coreTestnet } from "@/providers/wagmi-config";
 
 const PaymentSuccess = ({ paymentData, transactionHash }) => {
   const [copied, setCopied] = useState(false);
-  const { amount, tokenAddress, User } = paymentData;
+  const [updateStatus, setUpdateStatus] = useState(null); // null, 'updating', 'success', 'error'
+  const { amount, tokenAddress, User, uniqueId } = paymentData;
+
+  useEffect(() => {
+    const updateTransaction = async () => {
+      if (!uniqueId || !transactionHash) return;
+      
+      setUpdateStatus('updating');
+      
+      try {
+        const response = await fetch('/api/update-trx', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uniqueId,
+            txHash: transactionHash,
+          }),
+        });
+
+        if (response.ok) {
+          setUpdateStatus('success');
+        } else {
+          setUpdateStatus('error');
+          console.error('Failed to update transaction:', await response.text());
+        }
+      } catch (error) {
+        setUpdateStatus('error');
+        console.error('Error updating transaction:', error);
+      }
+    };
+
+    updateTransaction();
+  }, [uniqueId, transactionHash]);
 
   const handleCopyHash = async () => {
     if (transactionHash) {
