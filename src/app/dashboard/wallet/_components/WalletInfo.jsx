@@ -60,7 +60,7 @@ export default function WalletInfo({
                 Error loading address
               </span>
             ) : (
-              <span className="font-mono text-lg text-white font-semibold">
+              <span className="font-mono text-lg text-white font-semibold" alt={eoaAddress}>
                 {shortAddress(eoaAddress)}
               </span>
             )}
@@ -108,6 +108,12 @@ export default function WalletInfo({
             </button>
           )}
         </div>
+        <button
+          className="mt-8 sm:mt-0 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+          onClick={() => console.log("Withdraw clicked")}
+        >
+          Withdraw
+        </button>
       </div>
     </div>
   );

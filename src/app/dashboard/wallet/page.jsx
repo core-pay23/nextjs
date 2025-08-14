@@ -44,10 +44,7 @@ export default function WalletPage() {
             Tokens
           </button>
           <button className="px-4 py-1.5 rounded-lg bg-transparent text-white/60 font-semibold hover:bg-white/10 transition">
-            NFTs
-          </button>
-          <button className="px-4 py-1.5 rounded-lg bg-transparent text-white/60 font-semibold hover:bg-white/10 transition">
-            Transaction history
+            Transaction History
           </button>
         </div>
         <div className="overflow-x-auto">
