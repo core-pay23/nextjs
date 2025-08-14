@@ -4,20 +4,22 @@ import Modal from "@/components/Modal";
 import { DollarSignIcon, WalletIcon } from "@/components/dashboard/Icons";
 import { tokenList } from "@/lib/tokenlist";
 import QRCode from "qrcode";
+import { useWithdrawModal } from "@/providers/WithdrawModalProvider";
 
-const createUrl =(uniqueId) => {
+const createUrl = (uniqueId) => {
   return window.location.origin + `/pay/${uniqueId}`;
 };
 
-export default function CreatePaymentModal({
-  isOpen,
-  onClose,
-  onCreate,
-  paymentModalState,
-  setPaymentModalState,
-  paymentData,
-  setPaymentData
-}) {
+export default function WithdrawModal({ onWithdraw }) {
+  const {
+    isWithdrawModalOpen: isOpen,
+    closeWithdrawModal: onClose,
+    withdrawModalState,
+    setWithdrawModalState,
+    withdrawData,
+    setWithdrawData
+  } = useWithdrawModal();
+
   const [token, setToken] = useState("");
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,13 +32,13 @@ export default function CreatePaymentModal({
 
     setIsLoading(true);
     try {
-      await onCreate({ tokenAddress: token, amount: parseFloat(amount) });
+      await onWithdraw({ tokenAddress: token, amount: parseFloat(amount) });
       setToken("");
       setAmount("");
       // Don't call onClose() here - let the parent handle modal state
-      // The parent will set paymentModalState to "success" which will show success UI
+      // The parent will set withdrawModalState to "success" which will show success UI
     } catch (error) {
-      console.error("Error creating payment:", error);
+      console.error("Error creating withdrawal:", error);
       // Only close on error if you want to, or keep it open to show error
       // For now, keep it open to allow retry
     } finally {
@@ -47,18 +49,18 @@ export default function CreatePaymentModal({
   const handleClose = () => {
     setToken("");
     setAmount("");
-    setPaymentModalState("create");
-    setPaymentData(null);
+    setWithdrawModalState("create");
+    setWithdrawData(null);
     onClose();
   };
 
-  // Generate QR code when payment data changes
+  // Generate QR code when withdraw data changes
   useEffect(() => {
-    if (paymentModalState === "success" && paymentData && qrCodeRef.current) {
+    if (withdrawModalState === "success" && withdrawData && qrCodeRef.current) {
       // Clear previous QR code
       qrCodeRef.current.innerHTML = '';
       
-      const url = createUrl(paymentData.payment.uniqueId);
+      const url = createUrl(withdrawData.withdrawal.uniqueId);
       
       QRCode.toDataURL(url, {
         width: 180,
@@ -79,20 +81,20 @@ export default function CreatePaymentModal({
         console.error('Error generating QR code:', error);
       });
     }
-  }, [paymentModalState, paymentData]);
+  }, [withdrawModalState, withdrawData]);
 
-  if(paymentData){
-    console.log("Payment Data:", paymentData);
+  if(withdrawData){
+    console.log("Withdraw Data:", withdrawData);
   }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="New Payment"
+      title="New Withdrawal"
       size="md"
     >
-      {paymentModalState === "create" && (
+      {withdrawModalState === "create" && (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Token Select */}
           <div>
@@ -183,17 +185,17 @@ export default function CreatePaymentModal({
               disabled={isLoading || !token || !amount}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 disabled:from-orange-800 disabled:to-orange-800 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all duration-300 ease-in-out"
             >
-              {isLoading ? "Creating..." : "Create Payment"}
+              {isLoading ? "Processing..." : "Withdraw"}
             </button>
           </div>
         </form>
       )}
 
-      {paymentModalState === "success" && paymentData && (
+      {withdrawModalState === "success" && withdrawData && (
         (() => {
           // Find token info from tokenList
-          const tokenInfo = tokenList.find(t => t.address === paymentData.payment.tokenAddress);
-          const url = createUrl(paymentData.payment.uniqueId);
+          const tokenInfo = tokenList.find(t => t.address === withdrawData.withdrawal.tokenAddress);
+          const url = createUrl(withdrawData.withdrawal.uniqueId);
           
           // Copy to clipboard handler
           const handleCopy = async () => {
@@ -224,16 +226,16 @@ export default function CreatePaymentModal({
                   </svg>
                 </div>
                 <h1 className="text-xl font-semibold text-white mb-2">
-                  Payment Link Created!
+                  Withdrawal Request Created!
                 </h1>
                 <p className="text-sm text-white/60">
-                  Share this link with your customer to receive payment
+                  Your withdrawal is being processed
                 </p>
               </div>
 
-              {/* Payment Details */}
+              {/* Withdrawal Details */}
               <div className="border border-white/10 rounded-xl p-6 space-y-4 w-full">
-                <h2 className="text-base font-medium text-white">Payment Details</h2>
+                <h2 className="text-base font-medium text-white">Withdrawal Details</h2>
                 
                 {/* Amount */}
                 <div className="space-y-3">
@@ -253,7 +255,7 @@ export default function CreatePaymentModal({
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-white">{paymentData.payment.amount}</p>
+                      <p className="text-2xl font-bold text-white">{withdrawData.withdrawal.amount}</p>
                       <p className="text-white/60 text-sm">{tokenInfo?.symbol || ''}</p>
                     </div>
                   </div>
@@ -265,9 +267,9 @@ export default function CreatePaymentModal({
                 <div ref={qrCodeRef} className="flex items-center justify-center"></div>
               </div>
               
-              {/* Payment URL with copy button */}
+              {/* Withdrawal URL with copy button */}
               <div className="w-full space-y-2">
-                <label className="block text-sm font-medium text-white/80">Payment URL</label>
+                <label className="block text-sm font-medium text-white/80">Withdrawal URL</label>
                 <div className="flex items-center bg-slate-900/40 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
                   <input
                     type="text"
@@ -303,10 +305,10 @@ export default function CreatePaymentModal({
                   Close
                 </button>
                 <button
-                  onClick={() => setPaymentModalState("create")}
+                  onClick={() => setWithdrawModalState("create")}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white rounded-xl font-medium transition-all duration-300 ease-in-out"
                 >
-                  Create Another
+                  New Withdrawal
                 </button>
               </div>
             </div>

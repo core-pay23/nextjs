@@ -2,6 +2,7 @@
 import React from "react";
 import { useEOAAddress } from "@/hooks";
 import WalletCard from "./_components/WalletCard";
+import WithdrawModalWithProvider from "@/components/WithdrawModalWithProvider";
 
 // Dummy data for demonstration (except address)
 const wallet = {
@@ -25,6 +26,24 @@ const tokens = [
 
 export default function WalletPage() {
   const { eoaAddress, loading, error } = useEOAAddress();
+
+  // Dummy withdraw function for demonstration
+  const handleWithdraw = async (data) => {
+    console.log("Withdraw data:", data);
+    // In a real app, this would call your API to create a withdrawal
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          withdrawal: {
+            uniqueId: "wd-12345",
+            tokenAddress: data.tokenAddress,
+            amount: data.amount,
+            status: "pending"
+          }
+        });
+      }, 1000);
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br py-8 max-w-7xl px-6 mx-auto">
@@ -110,6 +129,9 @@ export default function WalletPage() {
           </table>
         </div>
       </div>
+      
+      {/* Withdraw Modal with Provider */}
+      <WithdrawModalWithProvider onWithdraw={handleWithdraw} />
     </div>
   );
 }

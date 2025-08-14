@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useWithdrawModal } from "@/providers/WithdrawModalProvider";
 
 const handleCopy = async (text, setCopied) => {
   try {
@@ -18,6 +19,8 @@ export default function WalletInfo({
   error,
 }) {
   const [copied, setCopied] = React.useState(false);
+  const { openWithdrawModal } = useWithdrawModal();
+  
   // Helper to shorten address
   const shortAddress = (addr) =>
     addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : "";
@@ -110,7 +113,7 @@ export default function WalletInfo({
         </div>
         <button
           className="mt-8 sm:mt-0 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-          onClick={() => console.log("Withdraw clicked")}
+          onClick={openWithdrawModal}
         >
           Withdraw
         </button>

@@ -7,10 +7,66 @@ This document describes the providers and hooks architecture for the core Paymen
 ### Providers
 - **AppProviders**: Main provider wrapper that includes TanStack Query and RainbowKit
 - **DashboardProvider**: Dashboard-specific context for managing dashboard state
+- **WithdrawModalProvider**: Context provider for managing the withdrawal modal state
+
+#### WithdrawModalProvider
+The `WithdrawModalProvider` is a context provider that manages the state of the withdrawal modal. It should be used within the `DashboardProvider` to ensure proper functionality.
+
+##### Setup
+The `WithdrawModalProvider` is automatically included in the `DashboardProvider`, so you don't need to manually add it to your component tree. It provides the following state and functions:
+
+- `isWithdrawModalOpen`: Boolean indicating if the modal is currently open
+- `setIsWithdrawModalOpen`: Function to set the modal open state
+- `withdrawModalState`: String indicating the current state ('create' or 'success')
+- `setWithdrawModalState`: Function to set the modal state
+- `withdrawData`: Object containing withdrawal data when in success state
+- `setWithdrawData`: Function to set withdrawal data
+- `openWithdrawModal`: Function to open the modal
+- `closeWithdrawModal`: Function to close the modal and reset state
+
+##### Usage
+To use the WithdrawModalProvider, you can either:
+1. Use the `useWithdrawModal` hook to access the modal state and control functions
+2. Use the `WithdrawModalWithProvider` component which automatically connects to the provider
+
+Example with hook:
+```jsx
+import { useWithdrawModal } from '@/providers/WithdrawModalProvider';
+
+function MyComponent() {
+  const { openWithdrawModal } = useWithdrawModal();
+  
+  return (
+    <button onClick={openWithdrawModal}>
+      Open Withdraw Modal
+    </button>
+  );
+}
+```
+
+Example with component:
+```jsx
+import WithdrawModalWithProvider from '@/components/WithdrawModalWithProvider';
+
+function MyComponent() {
+  const handleWithdraw = (data) => {
+    // Handle withdrawal logic
+    console.log('Withdraw data:', data);
+  };
+  
+  return (
+    <div>
+      {/* Other content */}
+      <WithdrawModalWithProvider onWithdraw={handleWithdraw} />
+    </div>
+  );
+}
+```
 
 ### Hooks
 - **Dashboard Hooks**: Data fetching and management for dashboard features
 - **Wallet Hooks**: Wallet connection, balance, and blockchain interactions
+- **WithdrawModal Hook**: Hook for managing withdrawal modal state and actions
 
 ## Setup
 
@@ -42,6 +98,62 @@ The app is wrapped with providers in this order:
 Fetches main dashboard statistics.
 ```jsx
 const { data: stats, isLoading, error } = useDashboardStats();
+```
+
+### WithdrawModal Hook
+
+#### `useWithdrawModal()`
+Hook for managing the withdrawal modal state and actions. This hook provides access to the modal state and functions to control it.
+
+```jsx
+import { useWithdrawModal } from '@/providers/WithdrawModalProvider';
+
+const {
+  isWithdrawModalOpen,     // Boolean: whether the modal is open
+  setIsWithdrawModalOpen,  // Function: set the modal open state
+  withdrawModalState,      // String: current state ('create' or 'success')
+  setWithdrawModalState,   // Function: set the modal state
+  withdrawData,           // Object: withdrawal data when in success state
+  setWithdrawData,        // Function: set withdrawal data
+  openWithdrawModal,      // Function: open the modal
+  closeWithdrawModal      // Function: close the modal and reset state
+} = useWithdrawModal();
+```
+
+##### Usage Example
+```jsx
+'use client';
+
+import { useWithdrawModal } from '@/providers/WithdrawModalProvider';
+
+function WithdrawButton() {
+  const { openWithdrawModal } = useWithdrawModal();
+
+  return (
+    <button onClick={openWithdrawModal}>
+      Open Withdraw Modal
+    </button>
+  );
+}
+```
+
+To use the WithdrawModal component with the provider, import and use the `WithdrawModalWithProvider` component:
+
+```jsx
+import WithdrawModalWithProvider from '@/components/WithdrawModalWithProvider';
+
+// In your component:
+<WithdrawModalWithProvider onWithdraw={handleWithdraw} />
+```
+
+Where `handleWithdraw` is a function that handles the withdrawal logic:
+
+```jsx
+const handleWithdraw = async (data) => {
+  // data contains { tokenAddress, amount }
+  // Implement your withdrawal logic here
+  // Return the withdrawal result
+};
 ```
 
 #### `useRevenueData()`

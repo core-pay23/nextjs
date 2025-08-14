@@ -5,6 +5,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import coreWagmiConfig from "./wagmi-config";
 import { darkTheme, midnightTheme,  RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
+import { WithdrawModalProvider } from "./WithdrawModalProvider";
 
 const queryClient = new QueryClient();
 
@@ -22,7 +23,9 @@ const DashboardProvider = ({ children }) => {
             overlayBlur: 'large',
           })}
         >
-          {children}
+          <WithdrawModalProvider>
+            {children}
+          </WithdrawModalProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
