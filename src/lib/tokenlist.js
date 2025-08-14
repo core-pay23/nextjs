@@ -1,6 +1,6 @@
 import { erc20Abi } from "viem";
-import { mockUSDCAddress } from "./contracts/mockUSDC";
-import { mockCoreBtcAbi, mockCoreBtcAddress } from "./contracts/btc";
+import { mockUSDCAddress } from "./contracts/mockUSDC.js";
+import { mockCoreBtcAbi, mockCoreBtcAddress } from "./contracts/btc.js";
 
 export const tokenList = [
     {

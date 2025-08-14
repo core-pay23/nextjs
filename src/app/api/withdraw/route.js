@@ -78,34 +78,37 @@ export async function POST(request) {
     if (!userExists) {
       return error("User not found");
     }
+    
+    console.log("Withdrawal request:", { clientWalletAddress, amount, tokenAddress });
 
     // return success(clientPrivateKey);
 
-    // 3. Send the token to clientWalletAddress, return the txhash
-    // Get the private key for the client's EOA wallet
-    // const senderPrivateKey = await getPrivateKey(clientWalletAddress);
-    const clientPrivateKey = await getPrivateKey(clientWalletAddress);
+    // 3. Send the token from merchant wallet to clientWalletAddress, return the txhash
+    // Get the private key for the merchant's EOA wallet (not the client's)
+    const merchantPrivateKey = await getPrivateKey(clientWalletAddress);
+    console.log("Retrieved merchant private key:", merchantPrivateKey ? "REDACTED" : "NOT FOUND");
 
     // Ensure the private key is in the correct format for viem
-    let formattedPrivateKey = clientPrivateKey;
-    if (!clientPrivateKey.startsWith("0x")) {
+    let formattedPrivateKey = merchantPrivateKey;
+    if (!merchantPrivateKey.startsWith("0x")) {
       // Check if it's a hex string or needs to be converted
-      if (/^[0-9a-fA-F]+$/.test(clientPrivateKey)) {
+      if (/^[0-9a-fA-F]+$/.test(merchantPrivateKey)) {
         // It's already a hex string, just add 0x prefix
-        formattedPrivateKey = `0x${clientPrivateKey}`;
+        formattedPrivateKey = `0x${merchantPrivateKey}`;
       } else {
         // It might be a base64 encoded string, convert it to hex
         try {
-          const buffer = Buffer.from(clientPrivateKey, "base64");
+          const buffer = Buffer.from(merchantPrivateKey, "base64");
           formattedPrivateKey = `0x${buffer.toString("hex")}`;
         } catch (e) {
           // If conversion fails, try to use it as is with 0x prefix
-          formattedPrivateKey = `0x${clientPrivateKey}`;
+          formattedPrivateKey = `0x${merchantPrivateKey}`;
         }
       }
     }
 
     const account = privateKeyToAccount(formattedPrivateKey);
+    console.log("Account address:", account.address);
 
     // // Create wallet client
     const client = createWalletClient({
@@ -113,6 +116,7 @@ export async function POST(request) {
       transport: http(coreTestnetConfig.rpcUrls.default.http[0]),
       account,
     });
+    console.log("Wallet client created");
 
     // // Create public client to get token decimals
     const publicClient = createPublicClient({
@@ -139,11 +143,12 @@ export async function POST(request) {
     }
 
     let tokenInfos = tokenList.find(t => t.address.toLocaleLowerCase() === tokenAddress.toLocaleLowerCase());
+    console.log("Token info:", tokenInfos);
 
     // Parse amount with correct decimals
     const parsedAmount = parseUnits(amount.toString(), decimals);
 
-    console.log(parsedAmount, decimals);
+    console.log("Parsed amount:", parsedAmount.toString(), "decimals:", decimals);
 
     let txHash;
     if (isNativeToken) {
@@ -156,27 +161,28 @@ export async function POST(request) {
       return success({ txHash });
     }
 
-    // For non-native tokens, approve the transaction before sending
-    const totalPayment = parsedAmount;
-    const args = {
-      address: tokenAddress,
-      abi: tokenInfos?.abi,
-      functionName: "approve",
-      args: [clientWalletAddress, totalPayment],
-    };
-
-    console.log(args);
-
-    // Approve the transaction
-    await client.writeContract(args);
-
+    // For non-native tokens, transfer directly (no approval needed for transfer from own account)
     // Send token transfer transaction using writeContract for better error handling
-    txHash = await client.writeContract({
+    console.log("Attempting token transfer:", {
       address: tokenAddress,
-      abi: tokenInfos?.abi,
       functionName: "transfer",
-      args: [clientWalletAddress, parsedAmount],
+      args: [clientWalletAddress, parsedAmount.toString()]
     });
+    
+    try {
+      txHash = await client.writeContract({
+        address: tokenAddress,
+        abi: tokenInfos?.abi,
+        functionName: "transfer",
+        args: [clientWalletAddress, parsedAmount],
+      });
+      console.log("Transfer successful, txHash:", txHash);
+      
+      return success({ txHash });
+    } catch (transferError) {
+      console.error("Transfer failed:", transferError);
+      return error("Transfer failed: " + transferError.message);
+    }
   } catch (err) {
     console.error("Withdrawal error:", err);
     return error("Failed to process withdrawal: " + err.message);

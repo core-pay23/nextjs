@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { generateSalt, generateWallet, encryptPrivateKey, decryptPrivateKey } from './cryptoUtils';
+import { generateSalt, generateWallet, encryptPrivateKey, decryptPrivateKey } from './cryptoUtils.js';
 
 const prisma = new PrismaClient();
 
