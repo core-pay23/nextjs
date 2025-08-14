@@ -1,5 +1,3 @@
-'use client';
-
 import { erc20Abi } from "viem";
 import { mockUSDCAddress } from "./contracts/mockUSDC";
 import { mockCoreBtcAbi, mockCoreBtcAddress } from "./contracts/btc";
@@ -9,9 +7,9 @@ export const tokenList = [
         name: "mockCoreBtc",
         symbol: "mockCoreBtc",
         address: mockCoreBtcAddress,
-        decimals: 18,
+        decimals: 8,
         abi: mockCoreBtcAbi,
-        native: true,
+        native: false,
         logoURI: "/icons/btc.png",
     },
     {

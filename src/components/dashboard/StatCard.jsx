@@ -24,6 +24,8 @@ export default function StatCard({ isLoading = false }) {
   // If EOA address is not available, we're still loading
   const loadingBalance = isLoading || isBalanceLoading || !eoaAddress || loading;
 
+  console.log(`here is btc balance`, btcBalance)
+
   return (
     <div className="bg-slate-900/40 backdrop-blur-lg border border-white/10 rounded-xl p-5 hover:bg-slate-900/50 transition-all duration-300">
       <div className="flex items-center justify-between mb-4">

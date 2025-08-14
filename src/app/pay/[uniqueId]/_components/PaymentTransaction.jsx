@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useWalletBalance } from "@/hooks/useWallet";
 import TokenDisplay from "./TokenDisplay";
@@ -104,6 +104,10 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
     token?.native ? null : tokenAddress
   );
 
+  useEffect(() => {},[balance, balanceLoading]);
+  console.log(`balance`, balance);
+  console.log(`token address`, tokenAddress);
+
   const formatBalance = () => {
     if (!balance || !token) return "0";
     return `${parseFloat(formatUnits(balance.value, token.decimals)).toFixed(
@@ -134,6 +138,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
 
     try {
       const requiredAmount = parseUnits(amount.toString(), token.decimals);
+      console.log(`requiredValue`, requiredAmount, balance.value);
       const insufficient = balance.value < requiredAmount;
       // console.log('Is insufficient?', insufficient);
       // console.log(`chain ID ${chainId}`)
@@ -213,6 +218,8 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         setTransactionId(extractedTransactionId);
 
         // Move to allowance step only for ERC20 tokens, skip for native tokens
+        console.log(token)
+        console.log(`token.native`, token?.native);
         if (token && !token.native) {
           setTransactionStep(TRANSACTION_STEP.ALLOW_TRANSACTION);
         } else {
