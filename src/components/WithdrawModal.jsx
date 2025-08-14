@@ -7,6 +7,8 @@ import { useWithdrawModal } from "@/providers/WithdrawModalProvider";
 import { useEOAAddress } from "@/hooks";
 import { useMerchantBalance } from "@/hooks/useMerchantBalance";
 import { useAccount, useSignMessage } from "wagmi";
+import { toast } from "react-toastify";
+import { coreTestnet } from "@/providers/wagmi-config";
 
 const createUrl = (uniqueId) => {
   return window.location.origin + `/pay/${uniqueId}`;
@@ -111,12 +113,53 @@ export default function WithdrawModal({ onWithdraw }) {
 
       const result = await response.json();
       
-      // Proceed with withdrawal
-      await onWithdraw(result);
-      setToken("");
+      // Show toast notification with transaction hash
+      if (result.txHash) {
+        toast.success(
+          <div className="flex flex-col">
+            <span className="font-medium">Withdrawal Successful!</span>
+            <span className="text-sm">Transaction: {result.txHash.substring(0, 10)}...{result.txHash.substring(result.txHash.length - 8)}</span>
+            <div className="flex gap-2 mt-2">
+              <button 
+                onClick={() => navigator.clipboard.writeText(result.txHash)}
+                className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded"
+              >
+                Copy
+              </button>
+              <a 
+                href={`${coreTestnet.blockExplorers.default.url}tx/${result.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded"
+              >
+                View
+              </a>
+            </div>
+          </div>,
+          {
+            position: "bottom-right",
+            autoClose: 10000,
+            closeOnClick: true,
+          }
+        );
+      }
+      
+      // Proceed with withdrawal and include txHash in the data
+      const withdrawResult = await onWithdraw(result);
+      // Update withdrawData to include txHash
+      if (result.txHash) {
+        setWithdrawData(prev => ({
+          ...prev,
+          ...result,
+          withdrawal: {
+            ...prev?.withdrawal,
+            ...withdrawResult?.withdrawal
+          }
+        }));
+      }
       setAmount("");
-      // Don't call onClose() here - let the parent handle modal state
-      // The parent will set withdrawModalState to "success" which will show success UI
+      // Set the modal state to success to show the success UI
+      setWithdrawModalState("success");
     } catch (error) {
       console.error("Error creating withdrawal:", error);
       // Only close on error if you want to, or keep it open to show error
@@ -319,9 +362,11 @@ export default function WithdrawModal({ onWithdraw }) {
         withdrawData &&
         (() => {
           // Find token info from tokenList
+          // We need to get the token address from the original form state since it's not in the API response
           const tokenInfo = tokenList.find(
-            (t) => t.address === withdrawData.withdrawal.tokenAddress
+            (t) => t.address.toLowerCase() === token?.toLowerCase()
           );
+          
           const url = createUrl(withdrawData.withdrawal.uniqueId);
 
           // Copy to clipboard handler
@@ -399,62 +444,11 @@ export default function WithdrawModal({ onWithdraw }) {
                 </div>
               </div>
 
-              {/* QR Code */}
-              <div className="bg-white p-4 rounded-xl shadow-lg">
-                <div
-                  ref={qrCodeRef}
-                  className="flex items-center justify-center"
-                ></div>
-              </div>
+              {/* QR Code - Removed as per request */}
 
-              {/* Withdrawal URL with copy button */}
-              <div className="w-full space-y-2">
-                <label className="block text-sm font-medium text-white/80">
-                  Withdrawal URL
-                </label>
-                <div className="flex items-center bg-slate-900/40 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
-                  <input
-                    type="text"
-                    value={url}
-                    readOnly
-                    className="flex-1 bg-transparent text-white/80 text-sm font-mono px-3 py-3 focus:outline-none select-all"
-                    style={{ minWidth: 0 }}
-                  />
-                  <button
-                    onClick={handleCopy}
-                    className="text-white/60 hover:text-white transition-colors shrink-0 px-4 py-3"
-                    title="Copy transaction hash"
-                  >
-                    {copied ? (
-                      <svg
-                        className="w-4 h-4 text-green-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
+              {/* Transaction Hash - Removed as per request */}
+
+              {/* Withdrawal URL with copy button - Removed as per request */}
 
               {/* Action Buttons */}
               <div className="flex gap-3 w-full pt-2">

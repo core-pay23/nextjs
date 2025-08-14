@@ -27,22 +27,18 @@ const tokens = [
 export default function WalletPage() {
   const { eoaAddress, loading, error } = useEOAAddress();
 
-  // Dummy withdraw function for demonstration
   const handleWithdraw = async (data) => {
     console.log("Withdraw data:", data);
-    // In a real app, this would call your API to create a withdrawal
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          withdrawal: {
-            uniqueId: "wd-12345",
-            tokenAddress: data.tokenAddress,
-            amount: data.amount,
-            status: "pending"
-          }
-        });
-      }, 1000);
-    });
+    // Return the actual data from the API response
+    return {
+      withdrawal: {
+        uniqueId: "wd-" + Date.now(), // Generate a unique ID
+        tokenAddress: data.tokenAddress,
+        amount: data.amount,
+        status: "completed"
+      },
+      txHash: data.txHash
+    };
   };
 
   return (

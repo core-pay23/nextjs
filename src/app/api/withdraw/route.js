@@ -121,16 +121,20 @@ export async function POST(request) {
       transport: http(coreTestnetConfig.rpcUrls.public.http[0]),
     });
 
-    // // Get token decimals
-    let decimals = 18; // Default to 18 decimals
-    try {
-      decimals = await publicClient.readContract({
-        address: tokenAddress,
-        abi: erc20Abi,
-        functionName: "decimals",
-      });
-    } catch (err) {
-      console.warn("Could not fetch token decimals, using default of 18");
+    // Check if token is native (CORE)
+    const isNativeToken = tokenAddress === '0x0000000000000000000000000000000000000000';
+    
+    let decimals = 18; // Default to 18 decimals for native token
+    if (!isNativeToken) {
+      try {
+        decimals = await publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: "decimals",
+        });
+      } catch (err) {
+        console.warn("Could not fetch token decimals, using default of 18");
+      }
     }
 
     // Parse amount with correct decimals
@@ -138,13 +142,35 @@ export async function POST(request) {
 
     console.log(parsedAmount, decimals);
 
-    // Send token transfer transaction using writeContract for better error handling
-    const txHash = await client.writeContract({
-      address: tokenAddress,
-      abi: erc20Abi,
-      functionName: "transfer",
-      args: [clientWalletAddress, parsedAmount],
-    });
+    let txHash;
+    if (isNativeToken) {
+      // For native tokens, use sendTransaction
+      txHash = await client.sendTransaction({
+        account,
+        to: clientWalletAddress,
+        value: parsedAmount,
+      });
+    } else {
+      // For non-native tokens, approve the transaction before sending
+      const totalPayment = parsedAmount;
+      const args = {
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [clientWalletAddress, totalPayment],
+      };
+      
+      // Approve the transaction
+      await client.writeContract(args);
+
+      // Send token transfer transaction using writeContract for better error handling
+      txHash = await client.writeContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: "transfer",
+        args: [clientWalletAddress, parsedAmount],
+      });
+    }
 
     return success({ txHash });
   } catch (err) {

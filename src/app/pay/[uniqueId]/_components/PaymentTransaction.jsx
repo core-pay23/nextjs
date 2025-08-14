@@ -214,10 +214,8 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
 
         // Move to allowance step only for ERC20 tokens, skip for native tokens
         if (token && !token.native) {
-          console.log(`do 1`);
           setTransactionStep(TRANSACTION_STEP.ALLOW_TRANSACTION);
         } else {
-          console.log(`do 2`);
           setTransactionStep(TRANSACTION_STEP.PAY_TRANSACTION);
         }
         break;
@@ -230,7 +228,6 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
         }
 
         // Handle approve errors
-        console.log(`do allow`);
         if (approveError) {
           console.error("Approve contract error:", approveError);
           setError(approveError.message || "Approval failed");
