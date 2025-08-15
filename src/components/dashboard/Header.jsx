@@ -6,40 +6,36 @@ import { useMobileMenu } from "@/providers/MobileMenuProvider";
 import { useAccount, useChainId } from "wagmi";
 import { coreTestnet } from "@/providers/wagmi-config";
 import Link from "next/link";
+import { Droplets, Bitcoin } from "lucide-react";
 
 export default function Header() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const isCorrectNetwork = chainId === coreTestnet.id;
-  // use mobile menu provider for mobile menu and mint actions
   const { openMenu, toggleMenu, isMenuOpen: providerMenuOpen, mintUSDC, mintCoreBtc, isPending } = useMobileMenu() || {};
 
-  // Note: minting actions and mobile menu rendering are handled by MobileMenuProvider
+  const buttonBaseStyles = "px-4 py-2 text-white text-sm font-medium rounded-lg transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 flex items-center gap-2";
+  const primaryButtonStyles = `bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 ${buttonBaseStyles}`;
+  const disabledButtonStyles = `bg-gradient-to-r from-slate-600 to-slate-700 ${buttonBaseStyles}`;
 
   return (
-    <div className="border-b border-white/10 backdrop-blur-lg">
+    <div className="border-b border-white/10 backdrop-blur-lg sticky top-0 z-30">
       <header className="flex items-center justify-between gap-4 max-w-7xl w-full px-4 py-2 mx-auto">
         <div className="flex items-center gap-4">
-
-          {/* CorePay Brand Header */}
-          <div className="flex items-center gap-3">
-            {/* Network Icon - representing digital connections/blockchain */}
-            <Link className="relative cursor-pointer" href="/dashboard">
-              <div className="w-14 h-14 rounded-lg p-1.5 shadow-lg">
-                <Image
-                  src="/icon.png"
-                  alt="CorePay Logo"
-                  width={924}
-                  height={924}
-                  className="w-full h-full"
-                  priority
-                />
-              </div>
-            </Link>
-          </div>
-
+          <Link className="relative cursor-pointer" href="/dashboard">
+            <div className="w-12 h-12 rounded-lg p-1 shadow-lg">
+              <Image
+                src="/icon.png"
+                alt="CorePay Logo"
+                width={924}
+                height={924}
+                className="w-full h-full"
+                priority
+              />
+            </div>
+          </Link>
           <Link className="cursor-pointer" href="/dashboard">
-            <h1 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-[#db5827] to-[#e78137] bg-clip-text text-transparent">
+            <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
               CorePay
             </h1>
             <p className="text-xs lg:text-sm text-white/60 hidden sm:block">
@@ -53,38 +49,34 @@ export default function Header() {
           <button
             onClick={() => mintUSDC && mintUSDC()}
             disabled={isPending || !isConnected || !isCorrectNetwork}
-            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            className={`${isPending || !isConnected || !isCorrectNetwork ? disabledButtonStyles : primaryButtonStyles}`}
           >
+            <Droplets className="h-4 w-4" />
             {isPending ? "Minting..." : "Mint USDC"}
           </button>
           <button
             onClick={() => mintCoreBtc && mintCoreBtc()}
             disabled={isPending || !isConnected || !isCorrectNetwork}
-            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            className={`${isPending || !isConnected || !isCorrectNetwork ? disabledButtonStyles : primaryButtonStyles}`}
           >
-            {isPending ? "Minting..." : "Mint Mock Core Btc"}
+            <Bitcoin className="h-4 w-4" />
+            {isPending ? "Minting..." : "Mint Mock Core BTC"}
           </button>
           <ConnectButton />
         </div>
 
-  {/* Mobile Navigation */}
-  <div className="md:hidden flex items-center gap-2">
-          {/* Mint Menu Button */}
+        {/* Mobile Navigation */}
+        <div className="md:hidden flex items-center gap-2">
           <div className="relative">
             <button
               onClick={() => openMenu && openMenu()}
-              className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              className={primaryButtonStyles}
             >
+              <Droplets className="h-4 w-4" />
               Mint
             </button>
           </div>
-
-          {/* Connect Button */}
-          <div className="flex items-center">
-            <ConnectButton />
-          </div>
-
-          {/* Hamburger Menu Button */}
+          <ConnectButton />
           <button
             onClick={() => toggleMenu && toggleMenu()}
             className="p-2 rounded-md text-white hover:bg-white/10 focus:outline-none"
@@ -115,8 +107,6 @@ export default function Header() {
           </button>
         </div>
       </header>
-
-  {/* Mobile menu moved to MobileMenu component provided by MobileMenuProvider */}
     </div>
   );
 }
