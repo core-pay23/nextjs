@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-
+import Link from "next/link";
 export default function DebitCard({
   title = "EOA Wallet",
   value = "$0.27",
@@ -54,10 +54,14 @@ export default function DebitCard({
     },
   };
 
+  const handleOnClick = () =>{
+    window.location.href = "/dashboard/wallet";
+  }
+
   return (
     <motion.div
       ref={cardRef}
-      className={`debit-card-animated relative rounded-2xl bg-gradient-to-br from-[#23243a] via-[#2d2e4a] to-[#1a1b2a] shadow-2xl p-6 flex flex-col justify-between min-h-[160px] overflow-hidden border border-orange-500/20 ${className}`}
+      className={`debit-card-animated relative rounded-2xl bg-gradient-to-br from-[#23243a] via-[#2d2e4a] to-[#1a1b2a] shadow-2xl p-6 flex flex-col justify-between min-h-[160px] overflow-hidden border border-orange-500/20 ${className} cursor-pointer`}
       style={{
         rotateX,
         rotateY,
@@ -68,6 +72,7 @@ export default function DebitCard({
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={handleOnClick}
       whileHover="hover"
       initial="initial"
       animate="initial"

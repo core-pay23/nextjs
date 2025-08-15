@@ -38,7 +38,7 @@ export async function GET(request) {
       where: {
         userId: user.id,
         status: {
-          in: ["COMPLETED", "FAILED"]
+          in: ["COMPLETED", "FAILED", "PENDING"]
         }
       },
       orderBy: {

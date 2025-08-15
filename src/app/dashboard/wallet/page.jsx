@@ -45,7 +45,7 @@ export default function WalletPage() {
       <div className="mx-auto bg-slate-900/40 backdrop-blur rounded-2xl border border-white/10 shadow-lg p-6">
         <div className="flex gap-4 mb-4">
           <button 
-            className={`px-4 py-1.5 rounded-lg font-semibold transition ${
+            className={`px-4 py-1.5 rounded-lg font-semibold transition cursor-pointer ${
               activeTab === "tokens" 
                 ? "bg-white/10 text-white" 
                 : "bg-transparent text-white/60 hover:bg-white/10"
@@ -55,7 +55,7 @@ export default function WalletPage() {
             Tokens
           </button>
           <button 
-            className={`px-4 py-1.5 rounded-lg font-semibold transition ${
+            className={`px-4 py-1.5 rounded-lg font-semibold transition cursor-pointer ${
               activeTab === "history" 
                 ? "bg-white/10 text-white" 
                 : "bg-transparent text-white/60 hover:bg-white/10"
