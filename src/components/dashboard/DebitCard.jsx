@@ -54,29 +54,26 @@ export default function DebitCard({
     },
   };
 
-  const handleOnClick = () =>{
-    window.location.href = "/dashboard/wallet";
-  }
 
   return (
-    <motion.div
-      ref={cardRef}
-      className={`debit-card-animated relative rounded-2xl bg-gradient-to-br from-[#23243a] via-[#2d2e4a] to-[#1a1b2a] shadow-2xl p-6 flex flex-col justify-between min-h-[160px] overflow-hidden border border-orange-500/20 ${className} cursor-pointer`}
-      style={{
-        rotateX,
-        rotateY,
-        willChange: "transform",
-        perspective: 1000,
-        boxShadow: "0 6px 32px 0 rgba(219, 88, 39, 0.15), 0 1.5px 6px 0 rgba(219, 88, 39, 0.08)",
-        background: "linear-gradient(135deg, #23243a 0%, #2d2e4a 30%, rgba(219, 88, 39, 0.08) 70%, #1a1b2a 100%)",
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleOnClick}
-      whileHover="hover"
-      initial="initial"
-      animate="initial"
-    >
+    <Link href="/dashboard/wallet" className="block h-full w-full">
+      <motion.div
+        ref={cardRef}
+        className={`debit-card-animated relative rounded-2xl bg-gradient-to-br from-[#23243a] via-[#2d2e4a] to-[#1a1b2a] shadow-2xl p-6 flex flex-col justify-between min-h-[160px] h-full overflow-hidden border border-orange-500/20 ${className} cursor-pointer`}
+        style={{
+          rotateX,
+          rotateY,
+          willChange: "transform",
+          perspective: 1000,
+          boxShadow: "0 6px 32px 0 rgba(219, 88, 39, 0.15), 0 1.5px 6px 0 rgba(219, 88, 39, 0.08)",
+          background: "linear-gradient(135deg, #23243a 0%, #2d2e4a 30%, rgba(219, 88, 39, 0.08) 70%, #1a1b2a 100%)",
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        whileHover="hover"
+        initial="initial"
+        animate="initial"
+      >
       {/* Framer Motion Shine Overlay */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-10"
@@ -141,5 +138,6 @@ export default function DebitCard({
         transition={{ type: "spring", stiffness: 200 }}
       />
     </motion.div>
+    </Link>
   );
 }
