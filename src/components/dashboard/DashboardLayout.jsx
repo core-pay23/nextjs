@@ -248,8 +248,26 @@ export default function DashboardLayout({ children }) {
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
           <main className="flex-1 overflow-y-auto">{children}</main>
+          <Footer />
         </div>
       </div>
     </div>
   );
 }
+
+const Footer = () => (
+  <footer className="border-t border-white/10 py-4 text-center text-sm text-white/60">
+    <p>
+      Need testnet funds? Visit the{" "}
+      <a
+        href="https://scan.test2.btcs.network/faucet"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-orange-500 hover:text-orange-600"
+      >
+        faucet
+      </a>
+      .
+    </p>
+  </footer>
+);
