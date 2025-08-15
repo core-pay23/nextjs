@@ -35,3 +35,7 @@ export const tokenList = [
 export const getTokenByName = (name) => {
     return tokenList.find((token) => token.name === name);
 };
+
+export const getTokenByAddress = (address) => {
+    return tokenList.find((token) => token.address.toLocaleLowerCase() === address.toLocaleLowerCase());
+};

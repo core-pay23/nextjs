@@ -1,6 +1,7 @@
 "use client";
 
 import { useWallet } from "@/hooks/useWallet";
+import { formatAddress } from "@/lib/utils/strings";
 
 const CustomConnectButton = ({ onConnect, className = "", children }) => {
   const { 
@@ -21,10 +22,6 @@ const CustomConnectButton = ({ onConnect, className = "", children }) => {
     }
   };
 
-  const formatAddress = (addr) => {
-    if (!addr) return "";
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
 
   if (isConnected) {
     return (

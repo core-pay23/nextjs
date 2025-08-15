@@ -7,6 +7,8 @@ import StatCard from "@/components/dashboard/StatCard";
 import DebitCard from "@/components/dashboard/DebitCard";
 import ChartCard from "@/components/dashboard/ChartCard";
 import CreatePaymentModal from "./_components/createPaymentModal";
+import RealTimePaymentsFeed from "./_components/RealTimePaymentsFeed";
+import PaymentTokenDistribution from "./_components/PaymentTokenDistribution";
 import {
   ActivityIcon,
   WalletIcon,
@@ -169,33 +171,14 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Monthly Revenue Trends */}
+        {/* Real-Time Payments Feed */}
         <ChartCard className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-medium">Monthly Revenue Trends</h2>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-emerald-400 flex items-center gap-1">
-                {/* Replace with Feather Icon */}
-                <ChevronDown className="h-3 w-3" />
-                +12.5%
-              </span>
-              <select className="text-xs bg-slate-800/50 border border-white/10 rounded px-2 py-1">
-                <option>2024</option>
-                <option>2023</option>
-              </select>
-            </div>
-          </div>
-          <div className="h-48 bg-slate-800/30 rounded-lg flex items-center justify-center">
-            <p className="text-white/40">Chart component placeholder</p>
-          </div>
+          <RealTimePaymentsFeed />
         </ChartCard>
 
-        {/* Genre Distribution */}
+        {/* Payment Token Distribution */}
         <ChartCard>
-          <h2 className="font-medium mb-4">Genre Distribution</h2>
-          <div className="h-48 bg-slate-800/30 rounded-lg flex items-center justify-center">
-            <p className="text-white/40">Chart component placeholder</p>
-          </div>
+          <PaymentTokenDistribution />
         </ChartCard>
       </div>
 
