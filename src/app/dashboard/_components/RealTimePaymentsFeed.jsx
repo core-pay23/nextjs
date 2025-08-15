@@ -78,9 +78,9 @@ export default function RealTimePaymentsFeed() {
   }, [eoaAddress]);
 
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-medium">Real-Time Payments Feed</h2>
+        <h2 className="font-medium text-base">Real-Time Payments Feed</h2>
         <Link
           href="/dashboard/wallet?action=history"
           className="text-xs text-white/60 hover:text-white transition flex items-center gap-1"
@@ -88,7 +88,7 @@ export default function RealTimePaymentsFeed() {
           View All <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-3 flex-1">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
             <div
@@ -141,7 +141,7 @@ export default function RealTimePaymentsFeed() {
             </div>
           ))
         ) : (
-          <div className="h-48 flex items-center justify-center text-white/40">
+          <div className="h-full flex items-center justify-center text-white/40">
             No recent payments found.
           </div>
         )}
