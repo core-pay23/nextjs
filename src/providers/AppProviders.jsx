@@ -6,7 +6,8 @@ import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { useState, useEffect } from 'react';
-import { config } from './wagmi-config';
+import coreWagmiConfig from './wagmi-config';
+import MobileMenuProvider from './MobileMenuProvider';
 
 export function AppProviders({ children }) {
   const [mounted, setMounted] = useState(false);
@@ -31,7 +32,7 @@ export function AppProviders({ children }) {
   }
 
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={coreWagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
@@ -43,7 +44,9 @@ export function AppProviders({ children }) {
           })}
           modalSize="compact"
         >
-          {children}
+          <MobileMenuProvider>
+            {children}
+          </MobileMenuProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </RainbowKitProvider>
       </QueryClientProvider>

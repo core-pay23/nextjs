@@ -4,9 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { config } from './wagmi-config';
+import coreWagmiConfig from './wagmi-config';
 import '@rainbow-me/rainbowkit/styles.css';
 import { useState } from 'react';
+import MobileMenuProvider from './MobileMenuProvider';
 
 export function ClientProviders({ children }) {
   const [queryClient] = useState(
@@ -22,7 +23,7 @@ export function ClientProviders({ children }) {
   );
 
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={coreWagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
@@ -34,7 +35,9 @@ export function ClientProviders({ children }) {
           })}
           modalSize="compact"
         >
-          {children}
+          <MobileMenuProvider>
+            {children}
+          </MobileMenuProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </RainbowKitProvider>
       </QueryClientProvider>
