@@ -1,6 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useEOAAddress } from "@/hooks";
+import { useSearchParams } from 'next/navigation';
+import { useWithdrawModal } from '@/providers/WithdrawModalProvider';
 import WalletCard from "./_components/WalletCard";
 import TokenList from "./_components/TokenList";
 import TransactionHistory from "./_components/TransactionHistory";
@@ -14,7 +16,19 @@ const wallet = {
 
 export default function WalletPage() {
   const { eoaAddress, loading, error } = useEOAAddress();
+  const searchParams = useSearchParams();
+  const { openWithdrawModal } = useWithdrawModal();
   const [activeTab, setActiveTab] = useState("tokens"); // "tokens" or "history"
+
+  useEffect(() => {
+    const action = searchParams.get('action');
+    
+    if (action === 'history') {
+      setActiveTab('history');
+    } else if (action === 'withdraw') {
+      openWithdrawModal();
+    }
+  }, [searchParams]);
 
   const handleWithdraw = async (data) => {
     console.log("Withdraw data:", data);

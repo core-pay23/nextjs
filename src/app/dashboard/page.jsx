@@ -139,7 +139,7 @@ export default function DashboardPage() {
             <span className="text-white font-medium">Create Payment</span>
           </button>
           <Link
-            href="/dashboard/wallet"
+            href="/dashboard/wallet?action=withdraw"
             className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-900/40 border border-white/10 backdrop-blur-md cursor-pointer transition group hover:bg-emerald-600/30 hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <span className="mb-2 text-emerald-400 group-hover:text-emerald-500">
