@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "test:crypto": "node src/lib/testCrypto.mjs",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.0",
