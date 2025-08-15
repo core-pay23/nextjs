@@ -442,7 +442,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-xl font-semibold text-white mb-2">
@@ -706,7 +706,7 @@ const PaymentTransaction = ({ paymentData, onSuccess }) => {
           w-full bg-gradient-to-r from-blue-500 to-cyan-600 
           hover:from-blue-600 hover:to-cyan-700 
           disabled:from-slate-600 disabled:to-slate-700
-          text-white font-medium py-4 px-6 rounded-xl 
+          text-white font-medium py-3 px-6 rounded-xl 
           transition-all duration-300 ease-in-out
           transform hover:scale-[1.02] hover:shadow-lg
           disabled:transform-none disabled:cursor-not-allowed

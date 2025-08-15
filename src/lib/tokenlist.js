@@ -4,8 +4,8 @@ import { mockCoreBtcAbi, mockCoreBtcAddress } from "./contracts/btc.js";
 
 export const tokenList = [
     {
-        name: "mockCoreBtc",
-        symbol: "mockCoreBtc",
+        name: "coreBtc",
+        symbol: "coreBtc",
         address: mockCoreBtcAddress,
         decimals: 8,
         abi: mockCoreBtcAbi,

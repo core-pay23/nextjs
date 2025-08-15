@@ -51,6 +51,12 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const toFixedAmount = (token, amount) => {
+  if (!token || !amount) return "0.00";
+  if(token.decimals < 8) return amount.toFixed(6);
+  return amount.toFixed(4);
+};
+
 export default function RealTimePaymentsFeed() {
   const { eoaAddress } = useEOAAddress();
   const [payments, setPayments] = useState([]);
@@ -122,7 +128,7 @@ export default function RealTimePaymentsFeed() {
                             />
                           )}
                           <p className="font-medium text-sm">
-                            {p.amount.toFixed(2)} {token ? token.symbol : 'Unknown Token'}
+                            {toFixedAmount(token, p.amount)} {token ? token.symbol : 'Unknown Token'}
                           </p>
                         </>
                       );

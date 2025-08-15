@@ -61,13 +61,13 @@ const PaymentContainer = ({ paymentData }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 md:h-screen">
       <div className="w-full max-w-[560px]">
         {/* Payment Progress */}
         <PaymentProgress currentStep={currentStep} />
         
         {/* Payment Card */}
-        <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl">
+        <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl mt-4 md:mt-0">
           {renderStep()}
         </div>
       </div>

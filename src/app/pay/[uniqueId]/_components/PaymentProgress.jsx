@@ -16,7 +16,7 @@ const PaymentProgress = ({ currentStep }) => {
   const currentIndex = getCurrentStepIndex();
 
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       {/* Progress Container - Centered with max width */}
       <div className="flex items-center justify-center">
         <div className="flex items-center justify-center w-full max-w-md mx-auto">

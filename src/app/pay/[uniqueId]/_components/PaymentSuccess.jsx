@@ -54,7 +54,7 @@ const PaymentSuccess = ({ paymentData, transactionHash }) => {
   const explorerUrl = `${coreTestnet.blockExplorers.default.url}tx/${transactionHash}`;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Success Animation */}
       <div className="text-center">
         <div className="w-14 h-14 mx-auto bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4">

@@ -18,7 +18,7 @@ export default function StatCard({ isLoading = false }) {
   const { tCore2, usdc, btc } = useMemo(() => ({
     tCore2: getTokenByName("tCore2"),
     usdc: getTokenByName("Mock USDC"),
-    btc: getTokenByName("mockCoreBtc"),
+    btc: getTokenByName("coreBtc"),
   }), []);
 
   // If EOA address is not available, we're still loading
